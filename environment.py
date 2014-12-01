@@ -1,31 +1,80 @@
-#-------------------------------------------------------------------------------
-# Name:        environment.py
+####
 #
-# Purpose:     Data representation for AI environment.
+# Environment Terrain Objects
+# Jake Kinsman
+# 11/28/2014
 #
-# Author:      Willie Boag
-#-------------------------------------------------------------------------------
+####
+import random
 
+class terrain:
+	
+	def __init__(self):
+		self.terrainWorld = list()
+		for _ in range(10):
+			section = list()
+			for __ in range(10):
+				obj = random.choice([grass(), water(), mountain(), forest()])
+				section.append(obj)
+			self.terrainWorld.append(section)
+	
+	def showTerrain(self):
+		for i in range(10):
+			print self.terrainWorld[i]
+	def showScores(self):
+		for i in range(10):
+			print map( lambda n: n.getScore(), self.terrainWorld[i])
+class terrainObject:
+	
+	def __init__(self):
+		pass
+	
+	def __repr__(self):
+		pass
 
-class Environment:
+	def getScore(self):
+		pass 
 
-    def __init__(self, problem):
-        raise Exception('cannot instantiate Environment base class')
+class grass(terrainObject):
+	
+	def __init__(self):
+		self.score = 5
+	
+	def __repr__(self):
+		return 'grass'
+	
+	def getScore(self):
+		return self.score
 
-    def reset(self):
-        raise Exception('must overload Envionment::reset() in derived class')
+class mountain(terrainObject):
+	
+	def __init__(self):
+		self.score = 3
+	
+	def __repr__(self):
+		return 'mountain'
+	
+	def getScore(self):
+		return self.score
 
-    def getCurrentState(self):
-        raise Exception('must overload Envionment::getCurrentState() in derived class')
+class water(terrainObject):
+	
+	def __init__(self):
+		self.score = 4
+	
+	def __repr__(self):
+		return 'water'
+	
+	def getScore(self):
+		return self.score
 
-    def getPossibleActions(selfself, state):
-        raise Exception('must overload Envionment::getPossibleActions() in derived class')
-
-    def doAction(self, action):
-        raise Exception('must overload Envionment::doActions() in derived class')
-
-    def isTerminal(self):
-        state = self.getCurrentState()
-        actions = self.getPossibleActions(state)
-        return len(actions) == 0
-
+class forest(terrainObject):
+	
+	def __init__(self):
+		self.score = 4
+	
+	def __repr__(self):
+		return 'forest'
+	
+	def getScore(self):
+		return self.score
