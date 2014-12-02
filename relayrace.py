@@ -25,7 +25,7 @@ class relayRace(object):
 		self.adpRaceOrder = list()
 		self.randomRaceOrder = list()
 		for _ in range(3):
-			self.world.addAgent(Agent.adpAgent())
+			self.world.addAgent(Agent.adpAgent(self.world))
 			self.world.addAgent(Agent.tdAgent())
 			self.world.addAgent(Agent.randomAgent())
 	

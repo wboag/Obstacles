@@ -39,6 +39,10 @@ from collections import defaultdict
 class agent(object):
 	
 	def __init__(self):
+		self.mountainReward = 3
+		self.forestReward = 4
+		self.waterReward = 4
+		self.grassReward = 5
 		self.waterSkill = 1
 		self.grassSkill = 1
 		self.mountainSkill = 1
@@ -94,7 +98,7 @@ class randomAgent(agent):
 
 class adpAgent(agent):
 	
-	def __init__(self):
+	def __init__(self, gameworld):
 		super(adpAgent, self).__init__()
 		self.type = "adp"
 		###Your Code Here :)###
