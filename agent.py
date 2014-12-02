@@ -39,6 +39,10 @@ from collections import defaultdict
 class agent(object):
 	
 	def __init__(self):
+		self.mountainReward = 3
+		self.forestReward = 4
+		self.waterReward = 4
+		self.grassReward = 5
 		self.waterSkill = 1
 		self.grassSkill = 1
 		self.mountainSkill = 1
