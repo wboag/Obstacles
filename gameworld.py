@@ -216,6 +216,11 @@ class gameWorld(object):
 			else:
 				self.setAgentState(newAgent, self.generateNextStates(state, action))
 
+	#tested
+	def getTerrainType(self, state):
+		x, y = state.getPosition()
+		return repr(self.terrains[state.getWorld()].terrainWorld[x][y])
+
 # test = gameWorld()
 # for world in test.terrains:
 # 	world.showTerrain()
@@ -257,7 +262,7 @@ class gameWorld(object):
 # print "\n"
 # print "No ADP Agents!"
 # print "Adding ADP Agent!"
-# test.addAgent(Agent.adpAgent())
+# test.addAgent(Agent.adpAgent(test))
 # print test.adpAgentIndex, " ADP Agents!"
 # print "adpAgent.waterScore:", test.adpAgents[0].getWaterSkill()
 # print "adpAgent.grassScore:", test.adpAgents[0].getGrassSkill()
@@ -291,5 +296,6 @@ class gameWorld(object):
 # print "moving testAgent: "
 # test.moveAgent(testAgent, test.getAgentState(testAgent), 'east')
 # print test.getAgentState(testAgent)
-
+# print ""
+# print "Test get terrain type: ", test.getTerrainType(State.state((0, 9), 0))
 

@@ -94,7 +94,7 @@ class randomAgent(agent):
 
 class adpAgent(agent):
 	
-	def __init__(self):
+	def __init__(self, gameworld):
 		super(adpAgent, self).__init__()
 		self.type = "adp"
 		###Your Code Here :)###
