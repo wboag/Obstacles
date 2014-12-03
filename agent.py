@@ -35,50 +35,26 @@
 
 import random
 from collections import defaultdict
+from empiricalMDP import EmpiricalMDP
+from valueIterationAgent import ValueIterationAgent
+
+
+
+def flipCoin( p ):
+    r = random.random()
+    return r < p
+
 
 class agent(object):
 	
 	def __init__(self):
-		self.mountainReward = 3
-		self.forestReward = 4
-		self.waterReward = 4
-		self.grassReward = 5
-		self.waterSkill = 1
-		self.grassSkill = 1
-		self.mountainSkill = 1
-		self.forestSkill = 1
+		self.rewardValues = { 'mountain':3, 'forest':4, 'water':4, 'grass':5 }
+		self.skillLevels  = { 'mountain':1, 'forest':1, 'water':1, 'grass':1 }
 		self.index = None
 
 	def __eq__(self, arg):
 		return arg.type == self.type and arg.index == self.index
 
-	def setWaterSkill(self, value):
-		self.waterSkill = value
-	
-	def setGrassSkill(self, value):
-		self.grassSkill = value
-	
-	def setMountainSkill(self, value):
-		self.mountainSkill = value
-	
-	def setForestSkill(self, value):
-		self.forestSkill = value
-	
-	def setIndex(self, value):
-		self.index = value
-
-	def getWaterSkill(self):
-		return self.waterSkill
-	
-	def getGrassSkill(self):
-		return self.grassSkill
-	
-	def getMountainSkill(self):
-		return self.mountainSkill
-	
-	def getForestSkill(self):
-		return self.forestSkill
-	
 	def getIndex(self):
 		return self.index
 	
@@ -97,19 +73,37 @@ class randomAgent(agent):
 
 class adpAgent(agent):
 	
-	def __init__(self, gameworld, transitions):
+	def __init__(self, gameworld, all_qstate_results):
 		super(adpAgent, self).__init__()
 		self.type = "adp"
-		###Your Code Here :)###
 
-	def update(self, oldState, terrainType, action, newState, reward):
-		###Your Code Here :)###
-		pass
+		# Parameters
+		self.epsilon = 0.5
+
+		# Estimate of model
+		self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.skillLevels)
+		self.solver = ValueIterationAgent(self.empirical_mdp, iterations=100)
+
+
+	def update(self, state, terrain, action, nextState, reward):
+		"""
+		print 'oldState: ', oldState
+		print 'terrainType: ', terrainType
+		print 'action: ', action
+		print 'newState: ', newState
+		print 'reward: ', reward
+		print
+        """
+		self.empirical_mdp.updateTransition(state, action, nextState, reward, terrain)
+
 
 	def chooseAction(self, actions, state, terrainType):
 		###Your Code Here :)###
-		filteredActions = filter(lambda n: n == 'east' or n == 'north' or n == 'finish', actions)
-		return random.choice(filteredActions)
+		if flipCoin(self.epsilon):
+			return random.choice(self.empirical_mdp.getPossibleActions(state))
+		else:
+			return self.solver.computeActionFromValues(state)
+
 
 class tdAgent(agent):
 	
