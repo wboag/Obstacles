@@ -88,8 +88,7 @@ class randomAgent(agent):
 		super(randomAgent, self).__init__()
 		self.type = "random"
 
-	def chooseAction(self, gameworld):
-		actions = gameworld.getActions(gameworld.getAgentState(self))
+	def chooseAction(self, actions):
 		filteredActions = filter(lambda n: n == 'east' or n == 'north' or n == 'finish', actions)
 		return random.choice(filteredActions)
 	
@@ -98,34 +97,33 @@ class randomAgent(agent):
 
 class adpAgent(agent):
 	
-	def __init__(self, gameworld):
+	def __init__(self, gameworld, transitions):
 		super(adpAgent, self).__init__()
 		self.type = "adp"
 		###Your Code Here :)###
 
-	def update(self):
+	def update(self, oldState, terrainType, action, newState, reward):
 		###Your Code Here :)###
 		pass
 
-	def chooseAction(self, gameworld):
+	def chooseAction(self, actions, state, terrainType):
 		###Your Code Here :)###
-		actions = gameworld.getActions(gameworld.getAgentState(self))
 		filteredActions = filter(lambda n: n == 'east' or n == 'north' or n == 'finish', actions)
-		return random.choice(filteredActions)  
+		return random.choice(filteredActions)
 
 class tdAgent(agent):
 	
-	def __init__(self):
+	def __init__(self, goalPosition):
 		super(tdAgent, self).__init__()
 		self.type = "td"
+		self.goalPosition = goalPosition
 		###Your Code Here :)###
 
-	def update(self):
+	def update(self, oldState, terrainType, action, newState, reward):
 		###Your Code Here :)###
 		pass
 
-	def chooseAction(self, gameworld):
+	def chooseAction(self, actions, state, terrainType):
 		###Your Code Here :)###
-		actions = gameworld.getActions(gameworld.getAgentState(self))
 		filteredActions = filter(lambda n: n == 'east' or n == 'north' or n == 'finish', actions)
 		return random.choice(filteredActions)  

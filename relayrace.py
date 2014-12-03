@@ -24,9 +24,16 @@ class relayRace(object):
 		self.tdRaceOrder = list()
 		self.adpRaceOrder = list()
 		self.randomRaceOrder = list()
-		for _ in range(3):
-			self.world.addAgent(Agent.adpAgent(self.world))
-			self.world.addAgent(Agent.tdAgent())
+		transitions = dict()
+		for i in range(3):
+			for j in range(10):
+				for k in range(10):
+					for action in self.world.getActions(State.state((j, k), i)):
+						for nextState in self.world.getAllPossibleSuccessors(State.state((j, k), i), action):
+							transitions[(State.state((j, k), i), action, nextState)] = 1
+
+			self.world.addAgent(Agent.adpAgent(self.world, transitions))
+			self.world.addAgent(Agent.tdAgent((9,0)))
 			self.world.addAgent(Agent.randomAgent())
 	
 	#tested
@@ -39,10 +46,15 @@ class relayRace(object):
 					movements = list()
 					score = 0
 					while not self.world.completedRace(self.world.getAgentState(tdAgent), index):
-						action = tdAgent.chooseAction(self.world)
+						oldState = self.world.getAgentState(tdAgent)
+						terrainType = self.world.getTerrainType(oldState)
+						actions = self.world.getActions(self.world.getAgentState(tdAgent))
+						action = tdAgent.chooseAction(actions, oldState, terrainType)
 						self.world.moveAgent(tdAgent, self.world.getAgentState(tdAgent), action)
+						newState = self.world.getAgentState(tdAgent)
+						reward = self.world.getReward(tdAgent, oldState)
 						movements.append(self.world.getAgentState(tdAgent))
-						tdAgent.update()
+						tdAgent.update(oldState, terrainType, action, newState, reward)
 					for ind, state in enumerate(movements):
 						if self.world.completedRace(state, 0):
 							score += (self.world.transitionalReward * (self.world.discount ** ind))
@@ -59,10 +71,15 @@ class relayRace(object):
 					movements = list()
 					score = 0
 					while not self.world.completedRace(self.world.getAgentState(adpAgent), index):
-						action = adpAgent.chooseAction(self.world)
+						oldState = self.world.getAgentState(adpAgent)
+						terrainType = self.world.getTerrainType(oldState)
+						actions = self.world.getActions(self.world.getAgentState(adpAgent))
+						action = adpAgent.chooseAction(actions, oldState, terrainType)
 						self.world.moveAgent(adpAgent, self.world.getAgentState(adpAgent), action)
+						newState = self.world.getAgentState(adpAgent)
+						reward = self.world.getReward(tdAgent, oldState)
 						movements.append(self.world.getAgentState(adpAgent))
-						adpAgent.update()
+						adpAgent.update(oldState, terrainType, action, newState, reward)
 					for ind, state in enumerate(movements):
 						if self.world.completedRace(state, 0):
 							score += (self.world.transitionalReward * (self.world.discount ** ind))
@@ -79,7 +96,8 @@ class relayRace(object):
 					movements = list()
 					score = 0
 					while not self.world.completedRace(self.world.getAgentState(randomAgent), index):
-						action = randomAgent.chooseAction(self.world)
+						actions = self.world.getActions(self.world.getAgentState(randomAgent))
+						action = randomAgent.chooseAction(actions)
 						self.world.moveAgent(randomAgent, self.world.getAgentState(randomAgent), action)
 						movements.append(self.world.getAgentState(randomAgent))
 						randomAgent.update()
@@ -158,13 +176,16 @@ class relayRace(object):
 		adpScores = list()
 		tdScores = list()
 		
-		#Race TD Agents
+		#Race Random Agents
 		for index, agentRef in enumerate(self.randomRaceOrder):
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.randomAgents[agentRef])
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
-				action = racingAgent.chooseAction(self.world)
+				oldState = self.world.getAgentState(racingAgent)
+				terrainType = self.world.getTerrainType(oldState)
+				actions = self.world.getActions(self.world.getAgentState(racingAgent))
+				action = racingAgent.chooseAction(actions)
 				self.world.moveAgent(racingAgent, self.world.getAgentState(racingAgent), action)
 				racingAgentMovements.append(self.world.getAgentState(racingAgent))
 			randomStates.append(racingAgentMovements)
@@ -184,7 +205,10 @@ class relayRace(object):
 			racingAgent = self.world.getWorldAgent(self.world.adpAgents[agentRef])
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
-				action = racingAgent.chooseAction(self.world)
+				oldState = self.world.getAgentState(racingAgent)
+				terrainType = self.world.getTerrainType(oldState)
+				actions = self.world.getActions(self.world.getAgentState(racingAgent))
+				action = racingAgent.chooseAction(actions, oldState, terrainType)
 				self.world.moveAgent(racingAgent, self.world.getAgentState(racingAgent), action)
 				racingAgentMovements.append(self.world.getAgentState(racingAgent))
 			adpStates.append(racingAgentMovements)
@@ -204,7 +228,10 @@ class relayRace(object):
 			racingAgent = self.world.getWorldAgent(self.world.tdAgents[agentRef])
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
-				action = racingAgent.chooseAction(self.world)
+				oldState = self.world.getAgentState(racingAgent)
+				terrainType = self.world.getTerrainType(oldState)
+				actions = self.world.getActions(self.world.getAgentState(racingAgent))
+				action = racingAgent.chooseAction(actions, oldState, terrainType)
 				self.world.moveAgent(racingAgent, self.world.getAgentState(racingAgent), action)
 				racingAgentMovements.append(self.world.getAgentState(racingAgent))
 			tdStates.append(racingAgentMovements)
