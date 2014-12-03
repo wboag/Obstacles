@@ -221,6 +221,23 @@ class gameWorld(object):
 		x, y = state.getPosition()
 		return repr(self.terrains[state.getWorld()].terrainWorld[x][y])
 
+	#tested
+	def getAllPossibleSuccessors(self, state, action):
+		x, y = state.getPosition()
+		successors = list()
+		if action is 'finish':
+			return [State.state((float("inf"), float("inf")), state.getWorld())]
+		else:
+			if x > 1:
+				successors.append(State.state((x - 1, y), state.getWorld()))
+			if y < 9:
+				successors.append(State.state((x, y + 1), state.getWorld()))
+			if x > 1 and y < 9:
+				successors.append(State.state((x - 1, y + 1), state.getWorld()))
+			successors.append(self.generateNextStates(state, action))
+			return successors
+
+
 # test = gameWorld()
 # for world in test.terrains:
 # 	world.showTerrain()
@@ -298,4 +315,18 @@ class gameWorld(object):
 # print test.getAgentState(testAgent)
 # print ""
 # print "Test get terrain type: ", test.getTerrainType(State.state((0, 9), 0))
+# print "TESTING GET POSSIBLE SUCCESSORS:"
+# print "TEST START: "
+# test = gameWorld()
+# start = test.getStartState()
+# print test.getAllPossibleSuccessors(start, 'north')
+# print "TEST END: "
+# end = State.state((9,0), 0)
+# print end.getPosition()
+# print test.getAllPossibleSuccessors(end, 'finish')
+# print "Testing random state on map 2: "
+# inter = State.state((5,5), 2)
+# print test.getAllPossibleSuccessors(inter, 'north')
+
+
 
