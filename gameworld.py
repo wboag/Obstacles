@@ -116,13 +116,13 @@ class gameWorld(object):
 			terrain = state.getWorld()
 			terrainElement = repr(self.terrains[terrain].terrainWorld[x][y])
 			if terrainElement == 'grass':
-				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.getGrassSkill()
+				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['grass']
 			if terrainElement == 'forest':
-				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.getForestSkill()
+				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['forest']
 			if terrainElement == 'water':
-				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.getWaterSkill()
+				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['water']
 			else:
-				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.getMountainSkill()
+				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['mountain']
 
 	#tested
 	def getStartState(self, terrainNum = 0):
@@ -159,10 +159,10 @@ class gameWorld(object):
 	#tested
 	def addAgent(self, agent):
 		newAgent = copy.deepcopy(agent)
-		newAgent.setWaterSkill(random.random() + .5)
-		newAgent.setGrassSkill(random.random() + .5)
-		newAgent.setForestSkill(random.random() + .5)
-		newAgent.setMountainSkill(random.random() + .5)
+		newAgent.skillLevels['water'] = random.random() + .5
+		newAgent.skillLevels['grass'] = random.random() + .5
+		newAgent.skillLevels['forest'] = random.random() + .5
+		newAgent.skillLevels['mountain'] = random.random() + .5
 		
 		if newAgent.type is "adp":
 			self.adpAgents.append(newAgent)
@@ -197,13 +197,13 @@ class gameWorld(object):
 			self.setAgentState(newAgent, self.generateNextStates(state, action))
 		else:
 			if terrainElement == 'grass':
-				chanceToFall = abs(newAgent.getGrassSkill() - 1) / 4
+				chanceToFall = abs(newAgent.skillLevels['grass'] - 1) / 4
 			elif terrainElement == 'water':
-				chanceToFall = abs(newAgent.getWaterSkill() - 1) / 4
+				chanceToFall = abs(newAgent.skillLevels['water'] - 1) / 4
 			elif terrainElement == 'forest':
-				chanceToFall = abs(newAgent.getWaterSkill() - 1) / 4
+				chanceToFall = abs(newAgent.skillLevels['forest'] - 1) / 4
 			else:
-				chanceToFall = abs(newAgent.getMountainSkill() - 1) / 2
+				chanceToFall = abs(newAgent.skillLevels['mountain'] - 1) / 2
 			x, y = state.getPosition()
 			chanceToSlideDown = 0.1 - ((0.1 / 10) * (abs(y -  0)))
 			chanceToSlideLeft = 0.1 - ((0.1 / 10) * (abs(x - 9)))

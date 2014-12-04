@@ -28,9 +28,13 @@ class relayRace(object):
 		for i in range(3):
 			for j in range(10):
 				for k in range(10):
-					for action in self.world.getActions(State.state((j, k), i)):
-						for nextState in self.world.getAllPossibleSuccessors(State.state((j, k), i), action):
-							transitions[(State.state((j, k), i), action, nextState)] = 1
+					curState = State.state((j, k), i)
+					curState.setTerrainType(self.world.getTerrainType(curState))
+					for action in self.world.getActions(curState):
+						for nextState in self.world.getAllPossibleSuccessors(curState, action):
+							if nextState.getPosition() != (float("inf"), float("inf")):
+								nextState.setTerrainType(self.world.getTerrainType(nextState))
+							transitions[(curState, action, nextState)] = 1
 
 			self.world.addAgent(Agent.adpAgent(self.world, transitions))
 			self.world.addAgent(Agent.tdAgent((9,0)))
@@ -48,10 +52,13 @@ class relayRace(object):
 					while not self.world.completedRace(self.world.getAgentState(tdAgent), index):
 						oldState = self.world.getAgentState(tdAgent)
 						terrainType = self.world.getTerrainType(oldState)
+						oldState.setTerrainType(terrainType)
 						actions = self.world.getActions(self.world.getAgentState(tdAgent))
 						action = tdAgent.chooseAction(actions, oldState, terrainType)
 						self.world.moveAgent(tdAgent, self.world.getAgentState(tdAgent), action)
 						newState = self.world.getAgentState(tdAgent)
+						if newState.getPosition() != (float("inf"), float("inf")):
+							newState.setTerrainType(self.world.getTerrainType(newState))
 						reward = self.world.getReward(tdAgent, oldState)
 						movements.append(self.world.getAgentState(tdAgent))
 						tdAgent.update(oldState, terrainType, action, newState, reward)
@@ -73,10 +80,13 @@ class relayRace(object):
 					while not self.world.completedRace(self.world.getAgentState(adpAgent), index):
 						oldState = self.world.getAgentState(adpAgent)
 						terrainType = self.world.getTerrainType(oldState)
+						oldState.setTerrainType(terrainType)
 						actions = self.world.getActions(self.world.getAgentState(adpAgent))
 						action = adpAgent.chooseAction(actions, oldState, terrainType)
 						self.world.moveAgent(adpAgent, self.world.getAgentState(adpAgent), action)
 						newState = self.world.getAgentState(adpAgent)
+						if newState.getPosition() != (float("inf"), float("inf")):
+							newState.setTerrainType(self.world.getTerrainType(newState))
 						reward = self.world.getReward(tdAgent, oldState)
 						movements.append(self.world.getAgentState(adpAgent))
 						adpAgent.update(oldState, terrainType, action, newState, reward)
@@ -184,6 +194,7 @@ class relayRace(object):
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
 				terrainType = self.world.getTerrainType(oldState)
+				oldState.setTerrainType(terrainType)
 				actions = self.world.getActions(self.world.getAgentState(racingAgent))
 				action = racingAgent.chooseAction(actions)
 				self.world.moveAgent(racingAgent, self.world.getAgentState(racingAgent), action)
@@ -207,6 +218,7 @@ class relayRace(object):
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
 				terrainType = self.world.getTerrainType(oldState)
+				oldState.setTerrainType(terrainType)
 				actions = self.world.getActions(self.world.getAgentState(racingAgent))
 				action = racingAgent.chooseAction(actions, oldState, terrainType)
 				self.world.moveAgent(racingAgent, self.world.getAgentState(racingAgent), action)
@@ -230,6 +242,7 @@ class relayRace(object):
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
 				terrainType = self.world.getTerrainType(oldState)
+				oldState.setTerrainType(terrainType)
 				actions = self.world.getActions(self.world.getAgentState(racingAgent))
 				action = racingAgent.chooseAction(actions, oldState, terrainType)
 				self.world.moveAgent(racingAgent, self.world.getAgentState(racingAgent), action)
