@@ -19,6 +19,10 @@ class EmpiricalMDP:
 
         # Empirical estimate of transition model
         # Initially assume, every q-state result is equally likely
+        #all_qstate_results = list(set(all_qstate_results))
+        for it in all_qstate_results:
+            print it
+        exit()
         counts = defaultdict(lambda:defaultdict(lambda:{}))
         for state,action,nestState in all_qstate_results:
             counts[state][action][nestState] = 1
@@ -42,6 +46,7 @@ class EmpiricalMDP:
         that "exit" states transition to the terminal
         state under the special action "done".
         """
+        print 'actions: ', self.frequencies[state].keys()
         return self.frequencies[state].keys()
 
 
@@ -51,7 +56,7 @@ class EmpiricalMDP:
         """
         retVal = []
         for action in self.frequencies[state]:
-            retVal += self.frequencies[state][action.keys()]
+            retVal += self.frequencies[state][action].keys()
         return list(retVal)
 
 
@@ -63,15 +68,12 @@ class EmpiricalMDP:
 
 
     def getReward(self, state, action, nextState):
-        """
-        Get reward for state, action, nextState transition.
-
-        Note that the reward depends only on the state being
-        departed (as in the R+N book examples, which more or
-        less use this convention).
-        """
-        print help(state)
-        exit()
+        #print help(state)
+        #print 'pos: ', state.getPosition()
+        if state.getPosition() == (9,0):
+            return 1000
+        else:
+            return 0
 
 
     def isTerminal(self, state):
@@ -82,7 +84,7 @@ class EmpiricalMDP:
         This convention is to make the grids line up with the examples
         in the R+N textbook.
         """
-        return False
+        return (self.frequencies[state].keys() == ['finish'])
 
 
     def getTransitionStatesAndProbs(self, state, action):

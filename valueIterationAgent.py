@@ -72,6 +72,7 @@ class ValueIterationAgent:
         """
         bestAction = None
         maxQ = float('-inf')
+        print 'state: ', state
         for a in self.mdp.getPossibleActions(state):
             # choose action that yields highest Q-value
             qVal = self.getQValue(state, a)
@@ -79,6 +80,7 @@ class ValueIterationAgent:
                 maxQ = qVal
                 bestAction = a
 
+        print 'action: ', bestAction
         return bestAction
 
 

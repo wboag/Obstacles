@@ -46,18 +46,51 @@ def flipCoin( p ):
 
 
 class agent(object):
-	
+
 	def __init__(self):
 		self.rewardValues = { 'mountain':3, 'forest':4, 'water':4, 'grass':5 }
 		self.skillLevels  = { 'mountain':1, 'forest':1, 'water':1, 'grass':1 }
 		self.index = None
+
+	def getSkill(self, skill):
+		return self.skillLevels[skill]
+
+	def getWaterSkill(self):
+		return self.getSkill('water')
+
+	def getGrassSkill(self):
+		return self.getSkill('grass')
+
+	def getForestSkill(self):
+		return self.getSkill('forest')
+
+	def getMountainSkill(self):
+		return self.getSkill('mountain')
+
+	def setSkill(self, skill, val):
+		self.skillLevels[skill] = val
+
+	def setWaterSkill(self, val):
+		self.setSkill('water', val)
+
+	def setGrassSkill(self, val):
+		self.setSkill('grass', val)
+
+	def setForestSkill(self, val):
+		self.setSkill('forest', val)
+
+	def setMountainSkill(self, val):
+		self.setSkill('mountain', val)
 
 	def __eq__(self, arg):
 		return arg.type == self.type and arg.index == self.index
 
 	def getIndex(self):
 		return self.index
-	
+
+	def setIndex(self, value):
+		self.index = value
+
 class randomAgent(agent):
 	
 	def __init__(self):
@@ -83,6 +116,10 @@ class adpAgent(agent):
 		# Estimate of model
 		self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.skillLevels)
 		self.solver = ValueIterationAgent(self.empirical_mdp, iterations=100)
+
+
+	def setEpsilon(self, epsilon):
+		self.epsilon = epsilon
 
 
 	def update(self, state, terrain, action, nextState, reward):

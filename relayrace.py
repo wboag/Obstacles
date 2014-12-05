@@ -10,7 +10,7 @@ import terrain as Terrain
 import state as State
 import agent as Agent
 import gameworld as Gameworld
-import graphics as Graphics
+#import graphics as Graphics
 
 import copy
 import random
@@ -24,13 +24,13 @@ class relayRace(object):
 		self.tdRaceOrder = list()
 		self.adpRaceOrder = list()
 		self.randomRaceOrder = list()
-		transitions = dict()
+		transitions = []
 		for i in range(3):
 			for j in range(10):
 				for k in range(10):
 					for action in self.world.getActions(State.state((j, k), i)):
 						for nextState in self.world.getAllPossibleSuccessors(State.state((j, k), i), action):
-							transitions[(State.state((j, k), i), action, nextState)] = 1
+							transitions.append( (State.state((j,k),i), action, nextState) )
 
 			self.world.addAgent(Agent.adpAgent(self.world, transitions))
 			self.world.addAgent(Agent.tdAgent((9,0)))
@@ -251,6 +251,7 @@ a = relayRace()
 print "TRAINING AGENTS..."
 print ""
 a.trainAgents(100)
+exit()
 a.arrangeTeam()
 print "\nRACING AGENTS..."
 print ""

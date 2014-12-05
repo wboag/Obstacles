@@ -8,8 +8,6 @@
 
 import terrain as Terrain
 import state as State
-import agent as Agent
-import graphics as Graphics
 import copy
 import random
 
