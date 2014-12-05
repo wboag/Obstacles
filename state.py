@@ -13,6 +13,7 @@ class state(object):
 	def __init__(self, position = (0, 9), terrainNum = 0):
 		self.position = position
 		self.world = terrainNum
+		self.terrainType = None
 	
 	def __repr__(self):
 		return "Position: " + str(self.position) + " " + "Terrain: " + str(self.world)
@@ -35,3 +36,9 @@ class state(object):
 	
 	def setWorld(self, value = 0):
 		self.world = value
+
+	def setTerrainType(self, terrainType):
+		self.terrainType = terrainType
+	
+	def getTerrainType(self):
+		return self.terrainType
