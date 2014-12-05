@@ -185,17 +185,67 @@ class adpAgent(agent):
 
 class tdAgent(agent):
 	
-	def __init__(self, goalPosition):
-		super(tdAgent, self).__init__()
-		self.type = "td"
-		self.goalPosition = goalPosition
-		###Your Code Here :)###
+    def __init__(self, goalPosition, eps = 0.5, alp = 0.5, gam = 0.9):
+        super(tdAgent, self).__init__()
+        self.type = "td"
+        self.goalPosition = goalPosition
+        self.weights = dict()
+        self.qvalues = dict()
+        self.epsilon = eps
+        self.alpha = alp
+        self.discount = gam
+        ###Your Code Here :)###
+        
+    def __getFeatures(self, state):
+        
+        pos = state.getPosition()
+        return dict({'dy' : pos[1] - self.goalPosition[1],
+                     'dx' : self.goalPosition[0] - pos[0],
+                     state.getTerrainType() : 1})
+        
+    def computeValueFromQValues(self, state):
+        actions = self.getLegalActions(state)
+        
+        if not actions:
+            return 0.0
+            
+        return max(self.getQValue(state, action) for action in actions)
+                    
+    def getLegalActions(self, state):
+        return self.actions
 
-	def update(self, oldState, terrainType, action, newState, reward):
-		###Your Code Here :)###
-		pass
+    def computeActionFromQValues(self, state):
+        actions = self.getLegalActions(state)
 
-	def chooseAction(self, actions, state, terrainType):
-		###Your Code Here :)###
-		filteredActions = filter(lambda n: n == 'east' or n == 'north' or n == 'finish', actions)
-		return random.choice(filteredActions)  
+        if not actions:
+            return None
+
+        return max(actions, key = lambda action: self.getQValue(state, action) + random.uniform(-.001,0))
+
+    def getAction(self, state):
+        return random.choice(self.getLegalActions(state)) if flipCoin(self.epsilon) else self.computeActionFromQValues(state)
+
+    def getQValue(self, state, action):
+        features = self.__getFeatures(state)
+#        print features
+        return sum(self.weights.get(feature,0) * features[feature] for feature in features.keys())
+
+    def update(self, state, terrainType, action, nextState, reward, nextActions):
+        ###Your Code Here :)###
+        features = self.__getFeatures(state)
+        self.actions = filter(lambda action : action not in ['west', 'south'], nextActions)
+        difference = reward + \
+                     self.discount * self.computeValueFromQValues(nextState) - \
+                     self.getQValue(state, action)
+                     
+        self.weights.update((feature, self.weights.get(feature,0) + \
+                             self.alpha * difference * features[feature])
+                            for feature in features.keys())
+
+
+
+    def chooseAction(self, actions, state, terrainType):
+        ###Your Code Here :)###
+        self.actions = filter(lambda action : action not in ['west', 'south'], actions)
+        return self.getAction(state)
+        
