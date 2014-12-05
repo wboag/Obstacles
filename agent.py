@@ -57,6 +57,9 @@ class agent(object):
 
 	def getIndex(self):
 		return self.index
+		
+	def setIndex(self, index):
+		self.index = index
 	
 class randomAgent(agent):
 	
