@@ -104,7 +104,7 @@ class gameWorld(object):
 		else:
 			self.randomAgentStates[newAgent.index] = state
 
-	#tested, less fallen
+	#tested
 	def getReward(self, agent, state):
 		newAgent = self.getWorldAgent(agent)
 		if self.completedRace(state, 1):
@@ -114,15 +114,16 @@ class gameWorld(object):
 		else:		
 			x, y = state.getPosition()
 			terrain = state.getWorld()
+			manDist = (abs(y - 9) + abs(x - 0))
 			terrainElement = repr(self.terrains[terrain].terrainWorld[x][y])
 			if terrainElement == 'grass':
-				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['grass']
+				return (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['grass']) + manDist
 			if terrainElement == 'forest':
-				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['forest']
+				return (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['forest']) + manDist
 			if terrainElement == 'water':
-				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['water']
+				return (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['water']) + manDist
 			else:
-				return self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['mountain']
+				return (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['mountain']) + manDist
 
 	#tested
 	def getStartState(self, terrainNum = 0):
@@ -335,4 +336,9 @@ class gameWorld(object):
 # print test.getAllPossibleSuccessors(State.state((5, 9), 1), 'north')
 # print test.getAllPossibleSuccessors(State.state((0, 4), 1), 'east')
 # print test.getAllPossibleSuccessors(State.state((4,4), 1), 'east')
-
+# test = gameWorld()
+# agent = Agent.tdAgent((9,0))
+# test.addAgent(agent)
+# state = State.state((0,9), 2)
+# print test.getReward(agent, state), test.getTerrainType(state)
+# print test.tdAgents[0].skillLevels[test.getTerrainType(state)]
