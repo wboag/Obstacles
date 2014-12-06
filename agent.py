@@ -105,49 +105,64 @@ class randomAgent(agent):
 	def update(self):
 		pass
 
+
 class adpAgent(agent):
 	
-	def __init__(self, gameworld, all_qstate_results):
-		super(adpAgent, self).__init__()
-		self.type = "adp"
+    def __init__(self, gameworld, all_qstate_results):
+        super(adpAgent, self).__init__()
+        self.type = "adp"
 
-		# Parameters
-		self.epsilon = 0.3
+        # Parameters
+        self.epsilon = 0.3
 
-		#for it in all_qstate_results:
-		#	print it
-		#exit()
+        #for it in all_qstate_results:
+        #print it
+        #exit()
 
-		# Estimate of model
-		self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.skillLevels)
-		self.solver = ValueIterationAgent(self.empirical_mdp, iterations=100)
+        # Estimate of model
+        self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.skillLevels)
+        self.solver = ValueIterationAgent(self.empirical_mdp, iterations=100)
 
-		print 'boop'
-		#exit()
+        print 'boop'
+        #exit()
 
-	def setEpsilon(self, epsilon):
-		self.epsilon = epsilon
+        # Keep track of number of completed episodes
+        self.completed = 0
+
+    def setEpsilon(self, epsilon):
+        self.epsilon = epsilon
 
 
-	def update(self, state, terrain, action, nextState, reward):
-		adpAgent.x += 1
-		if adpAgent.x == 3:
-			print 'oldState: ', state
-			print 'terrainType: ', terrain
-			print 'action: ', action
-			print 'newState: ', nextState
-			print 'reward: ', reward
-			print
-		self.empirical_mdp.updateTransition(state, action, nextState, reward, terrain)
+    def update(self, state, terrain, action, nextState, reward):
+        adpAgent.x += 1
+        if action == 'finish': #adpAgent.x <= adpAgent.y:
+            print 'oldState: ', state
+            print 'terrainType: ', terrain
+            print 'action: ', action
+            print 'newState: ', nextState
+            print 'reward: ', reward
+            print
+        if adpAgent.x == adpAgent.y: exit()
+        self.empirical_mdp.updateTransition(state, action, nextState, reward, terrain)
 
-	x=0
+    x=0
+    y=0
 
-	def chooseAction(self, actions, state, terrainType):
-		###Your Code Here :)###
-		if flipCoin(self.epsilon):
-			return random.choice(self.empirical_mdp.getPossibleActions(state))
-		else:
-			return self.solver.computeActionFromValues(state)
+    def chooseAction(self, actions, state, terrainType):
+        ###Your Code Here :)###
+        # Early exploration
+        if self.completed < 10:
+            actions = self.empirical_mdp.getPossibleActions(state)
+            newActions = filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), actions)
+            #print 'state: ', state
+            #print 'old: ', actions
+            #print 'new: ', newActions
+            return random.choice(newActions)
+
+        if flipCoin(self.epsilon):
+            return random.choice(self.empirical_mdp.getPossibleActions(state))
+        else:
+            return self.solver.computeActionFromValues(state)
 
 
 class tdAgent(agent):

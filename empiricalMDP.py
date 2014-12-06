@@ -24,9 +24,9 @@ class EmpiricalMDP:
         #    print it
         #exit()
         counts = defaultdict(lambda:defaultdict(lambda:{}))
-        for Astate,action,nextState in all_qstate_results:
-            if Astate.getPosition() == (0,9): thing = Astate
-            counts[Astate][action][nextState] = 1
+        for state,action,nextState in all_qstate_results:
+            counts[state][action][nextState] = 1
+            #print state
         self.frequencies = counts
         '''
         global state

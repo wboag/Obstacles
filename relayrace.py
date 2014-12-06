@@ -10,7 +10,7 @@ import terrain as Terrain
 import state as State
 import agent as Agent
 import gameworld as Gameworld
-#import graphics as Graphics
+import graphics as Graphics
 
 import copy
 import random
@@ -24,18 +24,22 @@ class relayRace(object):
 		self.tdRaceOrder = list()
 		self.adpRaceOrder = list()
 		self.randomRaceOrder = list()
+
+		# Every possible (state,action,nextState) tuple
 		transitions = []
-		for i in range(3):
-			for j in range(10):
-				for k in range(10):
-					curState = State.state((j, k), i)
+		for j in range(3):
+			for k in range(10):
+				for l in range(10):
+					curState = State.state((k, l), j)
 					curState.setTerrainType(self.world.getTerrainType(curState))
+					print curState
 					for action in self.world.getActions(curState):
 						for nextState in self.world.getAllPossibleSuccessors(curState, action):
 							if nextState.getPosition() != (float("inf"), float("inf")):
 								nextState.setTerrainType(self.world.getTerrainType(nextState))
 							transitions.append( (curState, action, nextState) )
 
+		for i in range(3):
 			self.world.addAgent(Agent.adpAgent(self.world, transitions))
 			self.world.addAgent(Agent.tdAgent((9,0)))
 			self.world.addAgent(Agent.randomAgent())
@@ -74,7 +78,7 @@ class relayRace(object):
 						self.highScores[(tdAgent.type, tdAgent.index, index)] = score
 
 				for adpAgent in self.world.adpAgents:
-					print 'start: ', self.world.getStartState(index)
+					#print 'start: ', self.world.getStartState(index)
 					self.world.setAgentState(adpAgent, self.world.getStartState(index))
 					movements = list()
 					score = 0
@@ -87,8 +91,9 @@ class relayRace(object):
 						self.world.moveAgent(adpAgent, self.world.getAgentState(adpAgent), action)
 						newState = self.world.getAgentState(adpAgent)
 						if newState.getPosition() != (float("inf"), float("inf")):
+							print newState.getPosition()
 							newState.setTerrainType(self.world.getTerrainType(newState))
-						reward = self.world.getReward(tdAgent, oldState)
+						reward = self.world.getReward(adpAgent, oldState)
 						movements.append(self.world.getAgentState(adpAgent))
 						adpAgent.update(oldState, terrainType, action, newState, reward)
 					for ind, state in enumerate(movements):
@@ -265,7 +270,7 @@ a = relayRace()
 print "TRAINING AGENTS..."
 print ""
 a.trainAgents(100)
-exit()
+#exit()
 a.arrangeTeam()
 print "\nRACING AGENTS..."
 print ""
