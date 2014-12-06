@@ -21,6 +21,13 @@ class state(object):
 	def __eq__(self, arg):
 		return arg.getPosition() == self.getPosition() and self.getWorld() == arg.getWorld()
 
+	def __hash__(self):
+		x,y = self.getPosition()
+		w = self.getWorld()
+		if x == float('inf'): return 1001
+		if y == float('inf'): return 1002
+		return 100*w + 10*y + x
+
 	def getState(self):
 		return [self.position, self.world]
 	

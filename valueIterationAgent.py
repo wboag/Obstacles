@@ -18,7 +18,7 @@ def max0(lst):
 
 class ValueIterationAgent:
 
-    def __init__(self, mdp, discount=0.5, iterations=100):
+    def __init__(self, mdp, discount=0.5, iterations=5):
 
         # parameters
         self.discount = discount

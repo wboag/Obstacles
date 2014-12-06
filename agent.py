@@ -111,12 +111,18 @@ class adpAgent(agent):
 		self.type = "adp"
 
 		# Parameters
-		self.epsilon = 0.5
+		self.epsilon = 0.0
+
+		for it in all_qstate_results:
+			print it
+		#exit()
 
 		# Estimate of model
 		self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.skillLevels)
 		self.solver = ValueIterationAgent(self.empirical_mdp, iterations=100)
 
+		print 'boop'
+		#exit()
 
 	def setEpsilon(self, epsilon):
 		self.epsilon = epsilon

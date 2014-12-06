@@ -8,7 +8,7 @@
 
 
 from collections import defaultdict
-
+from state import state
 
 class EmpiricalMDP:
 
@@ -20,13 +20,27 @@ class EmpiricalMDP:
         # Empirical estimate of transition model
         # Initially assume, every q-state result is equally likely
         #all_qstate_results = list(set(all_qstate_results))
-        for it in all_qstate_results:
-            print it
-        exit()
+        #for it in all_qstate_results:
+        #    print it
+        #exit()
         counts = defaultdict(lambda:defaultdict(lambda:{}))
-        for state,action,nestState in all_qstate_results:
-            counts[state][action][nestState] = 1
+        for Astate,action,nextState in all_qstate_results:
+            if Astate.getPosition() == (0,9): thing = Astate
+            counts[Astate][action][nextState] = 1
         self.frequencies = counts
+        '''
+        global state
+        mypoop = state((0,9),0)
+        print '\n\n\n'
+        print 'aaaa'
+        print mypoop
+        print 'zzzz'
+        print '---'
+        print counts[mypoop]
+        print '---'
+        print '\n\n\n'
+        exit()
+        '''
 
 
         # Inferred skills
@@ -46,6 +60,7 @@ class EmpiricalMDP:
         that "exit" states transition to the terminal
         state under the special action "done".
         """
+        print state
         print 'actions: ', self.frequencies[state].keys()
         return self.frequencies[state].keys()
 
@@ -73,7 +88,8 @@ class EmpiricalMDP:
         if state.getPosition() == (9,0):
             return 1000
         else:
-            return 0
+            x,y = state.getPosition()
+            return x + y
 
 
     def isTerminal(self, state):
