@@ -74,6 +74,7 @@ class relayRace(object):
 						self.highScores[(tdAgent.type, tdAgent.index, index)] = score
 
 				for adpAgent in self.world.adpAgents:
+					print 'start: ', self.world.getStartState(index)
 					self.world.setAgentState(adpAgent, self.world.getStartState(index))
 					movements = list()
 					score = 0

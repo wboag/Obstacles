@@ -60,8 +60,8 @@ class EmpiricalMDP:
         that "exit" states transition to the terminal
         state under the special action "done".
         """
-        print state
-        print 'actions: ', self.frequencies[state].keys()
+        #print state
+        #print 'actions: ', self.frequencies[state].keys()
         return self.frequencies[state].keys()
 
 

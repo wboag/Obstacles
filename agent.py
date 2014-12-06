@@ -112,10 +112,10 @@ class adpAgent(agent):
 		self.type = "adp"
 
 		# Parameters
-		self.epsilon = 0.0
+		self.epsilon = 0.3
 
-		for it in all_qstate_results:
-			print it
+		#for it in all_qstate_results:
+		#	print it
 		#exit()
 
 		# Estimate of model
@@ -130,16 +130,17 @@ class adpAgent(agent):
 
 
 	def update(self, state, terrain, action, nextState, reward):
-		"""
-		print 'oldState: ', oldState
-		print 'terrainType: ', terrainType
-		print 'action: ', action
-		print 'newState: ', newState
-		print 'reward: ', reward
-		print
-        """
+		adpAgent.x += 1
+		if adpAgent.x == 3:
+			print 'oldState: ', state
+			print 'terrainType: ', terrain
+			print 'action: ', action
+			print 'newState: ', nextState
+			print 'reward: ', reward
+			print
 		self.empirical_mdp.updateTransition(state, action, nextState, reward, terrain)
 
+	x=0
 
 	def chooseAction(self, actions, state, terrainType):
 		###Your Code Here :)###
