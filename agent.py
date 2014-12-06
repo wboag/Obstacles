@@ -91,6 +91,7 @@ class agent(object):
 	def setIndex(self, value):
 		self.index = value
 
+	
 class randomAgent(agent):
 	
 	def __init__(self):
