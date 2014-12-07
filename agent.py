@@ -36,7 +36,8 @@
 import random
 from collections import defaultdict
 from empiricalMDP import EmpiricalMDP
-from valueIterationAgent import ValueIterationAgent
+from  valueIterationAgent import ValueIterationAgent
+from policyIterationAgent import PolicyIterationAgent
 
 
 
@@ -113,56 +114,73 @@ class adpAgent(agent):
         self.type = "adp"
 
         # Parameters
-        self.epsilon = 0.3
+        self.epsilon = 0.2
 
-        #for it in all_qstate_results:
-        #print it
-        #exit()
+        #return
 
         # Estimate of model
-        self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.skillLevels)
-        self.solver = ValueIterationAgent(self.empirical_mdp, iterations=100)
+        self.inferredSkills = { k:1 for k  in ['water','grass','forest','mountain'] }
+        self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.rewardValues, self.inferredSkills)
+        self.solver = PolicyIterationAgent(self.empirical_mdp, iterations=100)
 
-        print 'boop'
+        print 'ADP agent created'
         #exit()
 
         # Keep track of number of completed episodes
         self.completed = 0
+        self.nextUpdate = 1
+
 
     def setEpsilon(self, epsilon):
         self.epsilon = epsilon
 
 
     def update(self, state, terrain, action, nextState, reward):
-        adpAgent.x += 1
-        if action == 'finish': #adpAgent.x <= adpAgent.y:
-            print 'oldState: ', state
-            print 'terrainType: ', terrain
-            print 'action: ', action
-            print 'newState: ', nextState
-            print 'reward: ', reward
-            print
-        if adpAgent.x == adpAgent.y: exit()
-        self.empirical_mdp.updateTransition(state, action, nextState, reward, terrain)
+        #print 'state:     ', state
+        #print 'action:    ', action
+        #print 'nextState: ', nextState
+        #print 'reward:    ', reward
 
-    x=0
-    y=0
+        #return
 
-    def chooseAction(self, actions, state, terrainType):
+        # update empirical MDP
+        self.empirical_mdp.update(state, action, nextState, reward, terrain)
+
+        # If finished epsiode
+        if action == 'finish':
+            #print 'finished\n\n\n'
+            # Only re-solve every 10 episodes (speeds up training)
+            if self.completed == self.nextUpdate:
+                #print str(self.completed) + ': solving again'
+                self.solver = self.solver = PolicyIterationAgent(self.empirical_mdp, iterations=100)
+                self.nextUpdate *= 2
+            self.completed += 1
+
+    def chooseAction(self, state):
         ###Your Code Here :)###
+        #print
+        #print 'state: ', state
+        #print 'old:  ', actions
+
+        #return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), actions))
+
+        '''
         # Early exploration
-        if self.completed < 10:
+        if self.completed < 20:
             actions = self.empirical_mdp.getPossibleActions(state)
             newActions = filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), actions)
-            #print 'state: ', state
-            #print 'old: ', actions
-            #print 'new: ', newActions
+            #print 'exploring'
             return random.choice(newActions)
+        '''
 
         if flipCoin(self.epsilon):
+            #print 'random'
             return random.choice(self.empirical_mdp.getPossibleActions(state))
         else:
-            return self.solver.computeActionFromValues(state)
+            #print 'policy'
+            return self.solver.getAction(state)
+
+        #return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), actions))
 
 
 class tdAgent(agent):
