@@ -32,7 +32,6 @@ class relayRace(object):
 				for l in range(10):
 					curState = State.state((k, l), j)
 					curState.setTerrainType(self.world.getTerrainType(curState))
-					print curState
 					for action in self.world.getActions(curState):
 						for nextState in self.world.getAllPossibleSuccessors(curState, action):
 							if nextState.getPosition() != (float("inf"), float("inf")):
@@ -40,9 +39,11 @@ class relayRace(object):
 							transitions.append( (curState, action, nextState) )
 
 		for i in range(3):
-			self.world.addAgent(Agent.adpAgent(self.world, transitions))
-			self.world.addAgent(Agent.tdAgent((9,0)))
-			self.world.addAgent(Agent.randomAgent())
+			# Each team has equal skills (apples to apples comparison)
+			skills = { k:(random.random() + .5)  for  k   in  ['water','grass','forest','mountain'] }
+			self.world.addAgent(Agent.adpAgent(self.world, transitions), skills)
+			self.world.addAgent(Agent.tdAgent((9,0))                   , skills)
+			self.world.addAgent(Agent.randomAgent()                    , skills)
 	
 	#tested
 	def trainAgents(self, numIter):
@@ -78,7 +79,6 @@ class relayRace(object):
 						self.highScores[(tdAgent.type, tdAgent.index, index)] = score
 
 				for adpAgent in self.world.adpAgents:
-					#print 'start: ', self.world.getStartState(index)
 					self.world.setAgentState(adpAgent, self.world.getStartState(index))
 					movements = list()
 					score = 0
@@ -87,11 +87,10 @@ class relayRace(object):
 						terrainType = self.world.getTerrainType(oldState)
 						oldState.setTerrainType(terrainType)
 						actions = self.world.getActions(self.world.getAgentState(adpAgent))
-						action = adpAgent.chooseAction(actions, oldState, terrainType)
+						action = adpAgent.chooseAction(oldState)
 						self.world.moveAgent(adpAgent, self.world.getAgentState(adpAgent), action)
 						newState = self.world.getAgentState(adpAgent)
 						if newState.getPosition() != (float("inf"), float("inf")):
-							print newState.getPosition()
 							newState.setTerrainType(self.world.getTerrainType(newState))
 						reward = self.world.getReward(adpAgent, oldState)
 						movements.append(self.world.getAgentState(adpAgent))
@@ -220,13 +219,15 @@ class relayRace(object):
 		for index, agentRef in enumerate(self.adpRaceOrder):
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.adpAgents[agentRef])
+			racingAgent.setEpsilon(0.0)
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
 				terrainType = self.world.getTerrainType(oldState)
 				oldState.setTerrainType(terrainType)
 				actions = self.world.getActions(self.world.getAgentState(racingAgent))
-				action = racingAgent.chooseAction(actions, oldState, terrainType)
+				action = racingAgent.chooseAction(oldState)
+				#print oldState, '\t', action
 				self.world.moveAgent(racingAgent, self.world.getAgentState(racingAgent), action)
 				racingAgentMovements.append(self.world.getAgentState(racingAgent))
 			adpStates.append(racingAgentMovements)
@@ -270,8 +271,57 @@ a = relayRace()
 print "TRAINING AGENTS..."
 print ""
 a.trainAgents(100)
+
+
+'''
+# display Policy
+for i in range(3):
+    print 'agent: ', i
+    for j in range(3):
+
+        for k in range(10):
+            for l in range(10):
+                print '%7s' % a.world.adpAgents[i].solver.getAction(State.state((l,k),j)),
+            print
+        print '\n\n'
+    print '\n\n\n'
 #exit()
+'''
+
+
 a.arrangeTeam()
+
+
+'''
+# display Terrain
+for i in range(3):
+    for j in range(10):
+        for k in range(10):
+            print '%10s' % a.world.getTerrainType(State.state((k,j),i)),
+        print
+    print '\n\n'
+'''
+
+'''
+# display Skills
+print 'tdAgents'
+for world in a.tdRaceOrder:
+    print '\t', a.world.tdAgents[world].skillLevels
+print
+
+print 'adpAgents'
+for world in a.adpRaceOrder:
+    print '\t', a.world.adpAgents[world].skillLevels
+print
+
+print 'randomAgents'
+for world in a.randomRaceOrder:
+    print '\t', a.world.randomAgents[world].skillLevels
+print
+
+#exit()
+'''
+
 print "\nRACING AGENTS..."
 print ""
 results, race = a.race()
