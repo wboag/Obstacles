@@ -43,6 +43,8 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	sky = pygame.transform.scale(sky, (1440, 850))
 	platform = pygame.image.load("platform.tiff")
 	platform = pygame.transform.scale(platform, (100, 50))
+	font = pygame.font.SysFont("monospace", 15)
+	start = font.render("Some text!", 1, (255,255,0))
 	move = 0
 	while not(move > len(results[0][worldNum]) and move > len(results[1][worldNum]) and move > len(results[2][worldNum])):
 	    randomAgentState = results[0][worldNum][min([move, len(results[0][worldNum]) - 1])]
@@ -77,6 +79,7 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	    		windowSurface.blit(tdAgent, stateToCoordinates(tdAgentState ,'td', worldNum))
 	    		windowSurface.blit(adpAgent, stateToCoordinates(adpAgentState ,'adp', worldNum))
 	    		windowSurface.blit(randomAgent, stateToCoordinates(randomAgentState ,'random', worldNum))
+	    		windowSurface.blit(start, stateToCoordinates(State.state((0,9), worldNum), None, worldNum))
 	    		if worldNum > 0:
 	    			for _, winner in enumerate(victors[0]):
 	    				windowSurface.blit(winner, victorPositions[0][_])
