@@ -156,12 +156,18 @@ class gameWorld(object):
 		return state.getPosition() == (float("inf"), float("inf")) and state.getWorld() <= worldNum
 
 	#tested
-	def addAgent(self, agent):
+	def addAgent(self, agent, skills=None):
 		newAgent = copy.deepcopy(agent)
-		newAgent.skillLevels['water'] = random.random() + .5
-		newAgent.skillLevels['grass'] = random.random() + .5
-		newAgent.skillLevels['forest'] = random.random() + .5
-		newAgent.skillLevels['mountain'] = random.random() + .5
+		if skills:
+			newAgent.skillLevels['water'   ] = skills['water'   ]
+			newAgent.skillLevels['grass'   ] = skills['grass'   ]
+			newAgent.skillLevels['forest'  ] = skills['forest'  ]
+			newAgent.skillLevels['mountain'] = skills['mountain']
+		else:
+			newAgent.skillLevels['water'] = random.random() + .5
+			newAgent.skillLevels['grass'] = random.random() + .5
+			newAgent.skillLevels['forest'] = random.random() + .5
+			newAgent.skillLevels['mountain'] = random.random() + .5
 		
 		if newAgent.type is "adp":
 			self.adpAgents.append(newAgent)
