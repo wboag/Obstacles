@@ -138,13 +138,13 @@ def stateToCoordinates(state, typeAgent, worldNum):
 			offset += 1140
 		return(offset, 0)
 	else:
-		if type is "adp":
+		if typeAgent is "adp":
 			offset = 44
-		if type is "random":
+		if typeAgent is "random":
 			offset = 84
-
-	x, y = state.getPosition()
-	return (((144 * x) + offset), ((70 * y) + 150))
+		x, y = state.getPosition()
+		print offset
+		return (((144 * x) + offset), ((70 * y) + 150))
 
 
 
