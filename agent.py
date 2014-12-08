@@ -203,7 +203,7 @@ class adpAgent(agent):
 
 class tdAgent(agent):
 	
-    def __init__(self, goalPosition, eps = 0.5, alp = 0.9, gam = 0.9):
+    def __init__(self, goalPosition, eps = 0.5, alp = 0.5, gam = 0.9):
         super(tdAgent, self).__init__()
         self.type = "td"
         self.goalPosition = goalPosition
@@ -213,15 +213,22 @@ class tdAgent(agent):
         self.alpha = alp
         self.discount = gam
         self.its = 0
+        self.weights['finish'] = 1.0
         ###Your Code Here :)###
         
     def __getFeatures(self, state):
         
         pos = state.getPosition()
-        return dict({'dy' : 1. / (pos[1] - self.goalPosition[1] + 1),
-                     'dx' : 1. / (self.goalPosition[0] - pos[0] + 1),
-                     state.getTerrainType() : 1})
-        
+        dy = pos[1] - self.goalPosition[1] + 1
+        dx = pos[1] - self.goalPosition[1] + 1
+        if pos != (float('inf'), float('inf')):
+            feat = dict({'dy %d' %(dy) : .1 / dy,
+                         'dx %d' %(dx): .1 / dx,
+                         state.getTerrainType() : .01})
+        else:
+            feat = dict({'finish' : 1000})
+
+        return feat
     def computeValueFromQValues(self, state):
         actions = self.getLegalActions(state)
         
@@ -251,7 +258,8 @@ class tdAgent(agent):
 
     def update(self, state, terrainType, action, nextState, reward, nextActions):
         ###Your Code Here :)###
-        p = False if True else not (self.its % 5000)
+        DEBUG= False
+        p = False if not DEBUG else not (self.its % 10000)
             
         self.its += 1
     
@@ -265,13 +273,16 @@ class tdAgent(agent):
         #print features
         if p:
             print
+            print features
             print self.weights
+            print reward, difference
         self.weights.update((feature, self.weights.get(feature,0) + \
                              self.alpha * difference * features[feature])
                             for feature in features.keys())
         if p:
             print self.weights
             print
+
     def chooseAction(self, actions, state, terrainType):
         ###Your Code Here :)###
 #        self.actions = filter(lambda action : action not in ['west', 'south'], actions)

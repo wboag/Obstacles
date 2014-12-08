@@ -50,7 +50,7 @@ class relayRace(object):
 		for index, terrain in enumerate(self.world.terrains):
 
 			for training in range(numIter):
-                                print training
+#                                print training
 				for tdAgent in self.world.tdAgents:
 					self.world.setAgentState(tdAgent, self.world.getStartState(index))
 					movements = list()
@@ -83,7 +83,8 @@ class relayRace(object):
                                         #print score
 					if score > self.highScores[(tdAgent.type, tdAgent.index, index)]:
 						self.highScores[(tdAgent.type, tdAgent.index, index)] = score
-                                        print "done"
+#                                        print "done"
+
 				for adpAgent in self.world.adpAgents:
 					self.world.setAgentState(adpAgent, self.world.getStartState(index))
 					movements = list()
@@ -300,22 +301,6 @@ for i,ind in enumerate(a.adpRaceOrder):
                     print '%7s' % action.upper(),
                 else:
                     print '%7s' % action,
-
-'''
-# display Policy
-agents = a.world.tdAgents
-for i in range(3):
-    print 'agent: ', i
-    agent = agents[i]
-    agent.endTraining()
-    for j in range(3):
-        for k in range(10):
-            for l in range(10):
-                state = State.state((l,k),j)
-                actions = a.world.getActions(state)
-                print '%7s' % agent.chooseAction(actions, state, state.getTerrainType()),
-            print
-        print '\n\n'
 
 #exit()
 '''
