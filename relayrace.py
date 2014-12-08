@@ -219,7 +219,7 @@ class relayRace(object):
 		for index, agentRef in enumerate(self.adpRaceOrder):
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.adpAgents[agentRef])
-			racingAgent.setEpsilon(0.0)
+			racingAgent.setEpsilon(0.001)
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
@@ -270,10 +270,10 @@ class relayRace(object):
 a = relayRace()
 print "TRAINING AGENTS..."
 print ""
-a.trainAgents(100)
+a.trainAgents(250)
 
 
-'''
+#'''
 # display Policy
 for i in range(3):
     print 'agent: ', i
@@ -286,13 +286,13 @@ for i in range(3):
         print '\n\n'
     print '\n\n\n'
 #exit()
-'''
+#'''
 
 
 a.arrangeTeam()
 
 
-'''
+#'''
 # display Terrain
 for i in range(3):
     for j in range(10):
@@ -300,7 +300,7 @@ for i in range(3):
             print '%10s' % a.world.getTerrainType(State.state((k,j),i)),
         print
     print '\n\n'
-'''
+#'''
 
 '''
 # display Skills
