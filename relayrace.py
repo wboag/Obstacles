@@ -219,7 +219,7 @@ class relayRace(object):
 		for index, agentRef in enumerate(self.adpRaceOrder):
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.adpAgents[agentRef])
-			racingAgent.setEpsilon(0.0)
+			racingAgent.setEpsilon(0.001)
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
@@ -268,6 +268,7 @@ class relayRace(object):
 		return [randomStates, adpStates, tdStates, randomScores, adpScores, tdScores], self
 
 a = relayRace()
+print ""
 print "TRAINING AGENTS..."
 print ""
 a.trainAgents(100)
@@ -285,7 +286,6 @@ for i in range(3):
             print
         print '\n\n'
     print '\n\n\n'
-#exit()
 '''
 
 

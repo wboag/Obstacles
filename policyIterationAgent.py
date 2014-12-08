@@ -141,7 +141,7 @@ class PolicyIterationAgent:
             values = newValues
 
             # Convergence?
-            if diffs < .01: break
+            if diffs < .0001: break
 
         return values
 
