@@ -104,9 +104,9 @@ def drawClosingScreen(windowSurface, race, results):
 	scoreText = font.render("Score: ", 1, (0, 0, 0), (255, 255, 255))
 	displayResultsText = font.render("Displaying Results: ", 1, (0,0,0), (255, 255, 255))
 	displayResultsPos = (600, 0)	
-	teamOneResultsPos = (300, 100)
-	teamTwoResultsPos = (300, 350)
-	teamThreeResultsPos = (300, 600)
+	teamOneResultsPos = (420, 100)
+	teamTwoResultsPos = (420, 350)
+	teamThreeResultsPos = (420, 600)
 	firstPlaceText = font.render("First Place: ", 1, (0, 0, 0), (255, 255, 255))
 	secondPlaceText = font.render("Second Place: ", 1, (0, 0, 0), (255, 255, 255))
 	thirdPlaceText = font.render("Third Place: ", 1, (0, 0, 0), (255, 255, 255))
@@ -125,13 +125,14 @@ def drawClosingScreen(windowSurface, race, results):
 		windowSurface.blit(teamTwoResultsText, teamTwoResultsPos)
 		windowSurface.blit(teamThreeResultsText, teamThreeResultsPos)
 		
+		windowSurface.blit(scoreText, (1325, 0))
 		for i, score in enumerate(reversed(scoreList)):
-			tScore = font.render(str(score), 1, (0, 0, 0), (255, 255, 255))
-			windowSurface.blit(tScore, (1000, (100 + 250 * i)))
+			tScore = font.render("%.2f" % score, 1, (0, 0, 0), (255, 255, 255))
+			windowSurface.blit(tScore, (1325, (100 + 250 * i)))
 		for i, team in enumerate(teamImages):
 			for j, member in enumerate(team):
 				member = pygame.transform.scale(member, (200, 200))
-				windowSurface.blit(member, (( 300 + 200 * j), (250 * i + 130)))
+				windowSurface.blit(member, (( 420 + 200 * j), (250 * i + 130)))
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				pygame.quit()
