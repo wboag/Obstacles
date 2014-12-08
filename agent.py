@@ -123,7 +123,6 @@ class adpAgent(agent):
         self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.rewardValues, self.inferredSkills)
         self.solver = PolicyIterationAgent(self.empirical_mdp, iterations=100)
 
-        print 'ADP agent created'
         #exit()
 
         # Keep track of number of completed episodes
@@ -185,7 +184,7 @@ class adpAgent(agent):
 
 class tdAgent(agent):
 	
-    def __init__(self, goalPosition, eps = 0.5, alp = 0.5, gam = 0.9):
+    def __init__(self, goalPosition, eps = 0.5, alp = 0.9, gam = 0.9):
         super(tdAgent, self).__init__()
         self.type = "td"
         self.goalPosition = goalPosition
@@ -194,13 +193,14 @@ class tdAgent(agent):
         self.epsilon = eps
         self.alpha = alp
         self.discount = gam
+        self.its = 0
         ###Your Code Here :)###
         
     def __getFeatures(self, state):
         
         pos = state.getPosition()
-        return dict({'dy' : pos[1] - self.goalPosition[1],
-                     'dx' : self.goalPosition[0] - pos[0],
+        return dict({'dy' : 1. / (pos[1] - self.goalPosition[1] + 1),
+                     'dx' : 1. / (self.goalPosition[0] - pos[0] + 1),
                      state.getTerrainType() : 1})
         
     def computeValueFromQValues(self, state):
@@ -232,20 +232,30 @@ class tdAgent(agent):
 
     def update(self, state, terrainType, action, nextState, reward, nextActions):
         ###Your Code Here :)###
+        p = False if True else not (self.its % 5000)
+            
+        self.its += 1
+    
         features = self.__getFeatures(state)
-        self.actions = filter(lambda action : action not in ['west', 'south'], nextActions)
+#        self.actions = filter(lambda action : action not in ['west', 'south'], nextActions)
+        self.actions = nextActions
         difference = reward + \
                      self.discount * self.computeValueFromQValues(nextState) - \
                      self.getQValue(state, action)
                      
+        #print features
+        if p:
+            print
+            print self.weights
         self.weights.update((feature, self.weights.get(feature,0) + \
                              self.alpha * difference * features[feature])
                             for feature in features.keys())
-
-
-
+        if p:
+            print self.weights
+            print
     def chooseAction(self, actions, state, terrainType):
         ###Your Code Here :)###
-        self.actions = filter(lambda action : action not in ['west', 'south'], actions)
+#        self.actions = filter(lambda action : action not in ['west', 'south'], actions)
+        self.actions = actions
         return self.getAction(state)
         

@@ -16,13 +16,6 @@ import copy
 import random
 from collections import defaultdict
 
-class testAgent(Agent.randomAgent):
-        def __init__(self, *args):
-                super(testAgent, self).__init__()
-                self.type = "adp"
-#               print self.type
-
-Agent.adpAgent = testAgent
 class relayRace(object):
 	
 	def __init__(self):
@@ -90,9 +83,8 @@ class relayRace(object):
                                         #print score
 					if score > self.highScores[(tdAgent.type, tdAgent.index, index)]:
 						self.highScores[(tdAgent.type, tdAgent.index, index)] = score
-
+                                        print "done"
 				for adpAgent in self.world.adpAgents:
-                                        continue
 					self.world.setAgentState(adpAgent, self.world.getStartState(index))
 					movements = list()
 					score = 0
@@ -159,7 +151,6 @@ class relayRace(object):
 							adpHighScore = score
 							adpArrangement = [i, j, k]
 
-                print adpHighScore
 		for i, agentI in enumerate(self.world.tdAgents):
 			for j, agentJ in enumerate(self.world.tdAgents):
 				for k, agentK in enumerate(self.world.tdAgents):
@@ -206,7 +197,6 @@ class relayRace(object):
 		
 		#Race Random Agents
 		for index, agentRef in enumerate(self.randomRaceOrder):
-                        print "hi"
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.randomAgents[agentRef])
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
@@ -231,7 +221,6 @@ class relayRace(object):
 
 		#Race ADP Agents
 		for index, agentRef in enumerate(self.adpRaceOrder):
-                        print "hi3"
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.adpAgents[agentRef])
 			racingAgent.setEpsilon(0.001)
@@ -258,7 +247,6 @@ class relayRace(object):
 
 		#Race TD Agents
 		for index, agentRef in enumerate(self.tdRaceOrder):
-                        print "hi2"
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.tdAgents[agentRef])
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
@@ -306,7 +294,6 @@ for i in range(3):
 
 
 a.arrangeTeam()
-
 
 
 '''
