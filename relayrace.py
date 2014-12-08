@@ -272,24 +272,32 @@ print ""
 print "TRAINING AGENTS..."
 print ""
 a.trainAgents(100)
+a.arrangeTeam()
 
 
-'''
+
 # display Policy
-for i in range(3):
-    print 'agent: ', i
-    for j in range(3):
+for i,ind in enumerate(a.adpRaceOrder):
 
+    bad = False
+    for j in range(10):
         for k in range(10):
-            for l in range(10):
-                print '%7s' % a.world.adpAgents[i].solver.getAction(State.state((l,k),j)),
+            action = a.world.adpAgents[ind].solver.getAction(State.state((k,j),i))
+            if action == 'west' or action == 'south':
+                bad = True
+
+    if bad:
+        for j in range(10):
+            for k in range(10):
+                action = a.world.adpAgents[ind].solver.getAction(State.state((k,j),i))
+                if action == 'south' or action == 'west':
+                    print '%7s' % action.upper(),
+                else:
+                    print '%7s' % action,
             print
         print '\n\n'
-    print '\n\n\n'
-'''
 
-
-a.arrangeTeam()
+#exit()
 
 
 '''
