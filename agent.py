@@ -95,16 +95,20 @@ class agent(object):
 	
 class randomAgent(agent):
 	
-	def __init__(self):
-		super(randomAgent, self).__init__()
-		self.type = "random"
+    def __init__(self):
+        super(randomAgent, self).__init__()
+        self.type = "random"
 
-	def chooseAction(self, actions):
-		filteredActions = filter(lambda n: n == 'east' or n == 'north' or n == 'finish', actions)
-		return random.choice(filteredActions)
+    def chooseAction(self, actions):
+        if flipCoin(0.08):
+            filteredActions = filter(lambda n: n == 'south' or n == 'west' or n == 'finish', actions)
+            if filteredActions == []: filteredActions = actions
+        else:
+            filteredActions = filter(lambda n: n == 'north' or n == 'east' or n == 'finish', actions)
+        return random.choice(filteredActions)
 	
-	def update(self):
-		pass
+    def update(self):
+        pass
 
 
 class adpAgent(agent):
@@ -127,6 +131,7 @@ class adpAgent(agent):
         #exit()
 
         # Keep track of number of completed episodes
+        self.converged = False
         self.completed = 0
         self.nextUpdate = 1
 
@@ -141,10 +146,19 @@ class adpAgent(agent):
         #print 'nextState: ', nextState
         #print 'reward:    ', reward
 
-        #return
+        # If already converged, then skip update
+        if self.converged:
+            return
 
         # update empirical MDP
         self.empirical_mdp.update(state, action, nextState, reward, terrain)
+
+        # If converged AFTER most recent update, then solve MDP for final time
+        if self.empirical_mdp.converged():
+            #print str(self.completed) + ': final solving'
+            self.solver = self.solver = PolicyIterationAgent(self.empirical_mdp, iterations=100)
+            self.converged = True
+            return
 
         # If finished epsiode
         if action == 'finish':
@@ -185,17 +199,16 @@ class adpAgent(agent):
 
 class tdAgent(agent):
 	
-	def __init__(self, goalPosition):
-		super(tdAgent, self).__init__()
-		self.type = "td"
-		self.goalPosition = goalPosition
-		###Your Code Here :)###
+    def __init__(self, goalPosition):
+        super(tdAgent, self).__init__()
+        self.type = "td"
+        self.goalPosition = goalPosition
+        ###Your Code Here :)###
 
-	def update(self, oldState, terrainType, action, newState, reward):
-		###Your Code Here :)###
-		pass
+    def update(self, oldState, terrainType, action, newState, reward):
+        ###Your Code Here :)###
+        pass
 
-	def chooseAction(self, actions, state, terrainType):
-		###Your Code Here :)###
-		filteredActions = filter(lambda n: n == 'east' or n == 'north' or n == 'finish', actions)
-		return random.choice(filteredActions)  
+    def chooseAction(self, actions, state, terrainType):
+        filteredActions = filter(lambda n: n == 'north' or n == 'east' or n == 'finish', actions)
+        return random.choice(filteredActions)
