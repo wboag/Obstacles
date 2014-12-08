@@ -11,7 +11,7 @@ from pygame.locals import *
 import state as State
 victors = list()
 victorPositions = list()
-
+winnerHistory = list()
 def simulation(results, race):
 	randomAgentMovements = results[0]
 	adpAgentMovements = results[1]
@@ -110,30 +110,45 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	    			#numWinners += 1
 	    			#tdWinner = numWinners
 	    		windowSurface.blit(tdAgent, stateToCoordinates(tdAgentState ,'td', worldNum, tdWinner))
+	    		if tdAgentState.getPosition() == (float("inf"), float("inf")):
+	    			drawAgentScore(results[5][worldNum], tdWinner, worldNum, windowSurface)
 	    		#if move is len(results[1][worldNum]) - 1:
 	    			#numWinners += 1
 	    			#adpWinner = numWinners
 	    		windowSurface.blit(adpAgent, stateToCoordinates(adpAgentState ,'adp', worldNum, adpWinner))
+	    		if adpAgentState.getPosition() == (float("inf"), float("inf")):
+	    			drawAgentScore(results[4][worldNum], adpWinner, worldNum, windowSurface)
 	    		#if move is len(results[0][worldNum]) - 1:
 	    			#numWinners += 1
 	    			#randomWinner = numWinners
 	    		windowSurface.blit(randomAgent, stateToCoordinates(randomAgentState ,'random', worldNum, randomWinner))
+	    		if randomAgentState.getPosition() == (float("inf"), float("inf")):
+	    			drawAgentScore(results[3][worldNum], randomWinner, worldNum, windowSurface)
 	    		windowSurface.blit(start, stateToCoordinates(State.state((0,9), worldNum), None, worldNum))
 	    		windowSurface.blit(finish, stateToCoordinates(State.state((9,0), worldNum), None, worldNum))
 	    		if worldNum > 0:
-	    			for _, winner in enumerate(victors[0]):
-	    				windowSurface.blit(winner, victorPositions[0][_])
+	    			for i, winner in enumerate(victors[0]):
+	    				windowSurface.blit(winner, victorPositions[0][i])
+	    			for j in range(3):
+	    				drawAgentScore(winnerHistory[0][2-j], j, 0, windowSurface)
+
 	    			if worldNum is 2:
-	    				for _, winner in enumerate(victors[1]):
-	    					windowSurface.blit(winner, victorPositions[1][_])
+	    				for i, winner in enumerate(victors[1]):
+	    					windowSurface.blit(winner, victorPositions[1][i])
+	    				for j in range(3):
+	    					drawAgentScore(winnerHistory[1][2 - j], j, 1, windowSurface)
 
 	    		pygame.display.flip()
 	    		move += 1
+	scoreList = [tdAgentScore, randomAgentScore, adpAgentScore]
+	scoreList.sort()
+	print "scoreList is: ", scoreList
+	winnerHistory.append(scoreList)
 	victors.append([tdAgent, adpAgent, randomAgent])
 	victorPositions.append([stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'td', worldNum, tdWinner), 
 		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'adp', worldNum, adpWinner), 
 		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'random', worldNum, randomWinner)])
-
+	print "winnerHistory is:", winnerHistory 
 def getAgentImage(agentType, index):
 
 	image = None
@@ -195,6 +210,30 @@ def stateToCoordinates(state, typeAgent, worldNum, numWinners = 0):
 			offset = 84
 		x, y = state.getPosition()
 		return (((144 * x) + offset), ((70 * y) + 150))
+def drawAgentScore(score, position, worldNum, windowSurface):
+	x, y = 0, 100
+	font = pygame.font.SysFont("arial", 12, False, False)
+	text = text = font.render("SCORE: %.2f" % score, 1, (0,0,0), (255, 255, 255))
+	location = tuple()
+	if position is 0 and worldNum is 0:
+		location = (x, y)
+	if position is 1 and worldNum is 0:
+		location = (x + 100, y)
+	if position is 2 and worldNum is 0:
+		location = (x + 200, y)
+	if position is 0 and worldNum is 1:
+		location = (x + 570, y)
+	if position is 1 and worldNum is 1:
+		location = (x + 670, y)
+	if position is 2 and worldNum is 1:
+		location = (x + 770, y)
+	if position is 0 and worldNum is 2:
+		location = (x + 1140, y)
+	if position is 1 and worldNum is 2:
+		location = (x + 1240, y)
+	if position is 2 and worldNum is 2:
+		location = (x + 1340, y)
+	windowSurface.blit(text, location)
 
 
 
