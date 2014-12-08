@@ -130,9 +130,9 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	    		pygame.display.flip()
 	    		move += 1
 	victors.append([tdAgent, adpAgent, randomAgent])
-	victorPositions.append([stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'td', worldNum), 
-		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'adp', worldNum), 
-		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'random', worldNum)])
+	victorPositions.append([stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'td', worldNum, tdWinner), 
+		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'adp', worldNum, adpWinner), 
+		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'random', worldNum, randomWinner)])
 
 def getAgentImage(agentType, index):
 
