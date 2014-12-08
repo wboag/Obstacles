@@ -97,7 +97,7 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 		adpWinner = 1
 	else:
 		randomWinner = 1
-	while not(move + randomHeadStart > len(results[0][worldNum]) and move + adpHeadStart > len(results[1][worldNum]) and move + randomHeadStart > len(results[2][worldNum])):
+	while not(move + randomHeadStart > len(results[0][worldNum]) and move + adpHeadStart > len(results[1][worldNum]) and move + tdHeadStart > len(results[2][worldNum])):
 	    randomAgentState = results[0][worldNum][min([move + randomHeadStart, len(results[0][worldNum]) - 1])]
 	    adpAgentState = results[1][worldNum][min([move + adpHeadStart, len(results[1][worldNum]) - 1])]
 	    tdAgentState = results[2][worldNum][min([move + tdHeadStart, len(results[2][worldNum]) - 1])]
