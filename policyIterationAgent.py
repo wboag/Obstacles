@@ -40,6 +40,9 @@ class PolicyIterationAgent:
         values = defaultdict(lambda:0)
         policy = { state:self.mdp.getPossibleActions(state)[0] for state in self.mdp.getStates() }
 
+        # Converged early?
+        streak = 0
+
         for _ in range(iterations):
 
             # step one: policy evaluation
@@ -72,7 +75,12 @@ class PolicyIterationAgent:
             policy = newPolicy
 
             # Convergence?
-            if diffs == 0: break
+            if diffs == 0:
+                break
+                streak += 1
+            else:
+                streak = 0
+            if streak >= 25: break
 
         #print 'CONVERGED'
         #for state in self.mdp.getStates():
@@ -133,15 +141,13 @@ class PolicyIterationAgent:
                     qVal += prob * (self.mdp.getReward(state,action,sPrime) + self.discount*values[sPrime])
                 newValues[state] = qVal
 
-                #if state.getPosition() == (9,0): print state
-
                 # Convergence test
                 diffs += abs(values[state] - newValues[state])
 
             values = newValues
 
             # Convergence?
-            if diffs < .0001: break
+            if diffs < .001: break
 
         return values
 
