@@ -23,7 +23,7 @@ def simulation(results, race):
 	tdAgentScores = results[5]
 
 	pygame.init()
-	pygame.time.set_timer(USEREVENT + 1, 250)
+	pygame.time.set_timer(USEREVENT + 1, 500)
 	completedRace = False
 	surface = pygame.display.set_mode((1440, 850), 0, 32)
 	for i in range(3):
