@@ -268,12 +268,13 @@ class relayRace(object):
 		return [randomStates, adpStates, tdStates, randomScores, adpScores, tdScores], self
 
 a = relayRace()
+print ""
 print "TRAINING AGENTS..."
 print ""
-a.trainAgents(250)
+a.trainAgents(100)
 
 
-#'''
+'''
 # display Policy
 for i in range(3):
     print 'agent: ', i
@@ -285,14 +286,13 @@ for i in range(3):
             print
         print '\n\n'
     print '\n\n\n'
-#exit()
-#'''
+'''
 
 
 a.arrangeTeam()
 
 
-#'''
+'''
 # display Terrain
 for i in range(3):
     for j in range(10):
@@ -300,7 +300,7 @@ for i in range(3):
             print '%10s' % a.world.getTerrainType(State.state((k,j),i)),
         print
     print '\n\n'
-#'''
+'''
 
 '''
 # display Skills

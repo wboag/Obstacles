@@ -97,9 +97,6 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 		adpWinner = 1
 	else:
 		randomWinner = 1
-	print "tdWinner", tdWinner
-	print "adpWinner", adpWinner
-	print "random", randomWinner
 	while not(move + randomHeadStart > len(results[0][worldNum]) and move + adpHeadStart > len(results[1][worldNum]) and move + randomHeadStart > len(results[2][worldNum])):
 	    randomAgentState = results[0][worldNum][min([move + randomHeadStart, len(results[0][worldNum]) - 1])]
 	    adpAgentState = results[1][worldNum][min([move + adpHeadStart, len(results[1][worldNum]) - 1])]
@@ -154,23 +151,21 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	    					drawAgentScore(winnerHistory[1][2 - j], j, 1, windowSurface)
 
 	    		pygame.display.flip()
-	    		if len(results[0][worldNum]) < move:
+	    		if len(results[0][worldNum]) <= move + randomHeadStart:
 	    			randomNewHeadStart += 1
-	    		if len(results[1][worldNum]) < move:
+	    		if len(results[1][worldNum]) <= move + adpHeadStart:
 	    			adpNewHeadStart += 1
-	    		if len(results[2][worldNum]) < move:
+	    		if len(results[2][worldNum]) <= move + tdHeadStart:
 	    			tdNewHeadStart += 1
 	    		move += 1
 	headStart.append([randomNewHeadStart, adpNewHeadStart, tdNewHeadStart])
 	scoreList = [tdAgentScore, randomAgentScore, adpAgentScore]
 	scoreList.sort()
-	print "scoreList is: ", scoreList
 	winnerHistory.append(scoreList)
 	victors.append([tdAgent, adpAgent, randomAgent])
 	victorPositions.append([stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'td', worldNum, tdWinner), 
 		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'adp', worldNum, adpWinner), 
-		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'random', worldNum, randomWinner)])
-	print "winnerHistory is:", winnerHistory 
+		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'random', worldNum, randomWinner)]) 
 
 def getAgentImage(agentType, index):
 	image = None
