@@ -24,7 +24,6 @@ def simulation(results, race):
 	pygame.time.set_timer(USEREVENT + 1, 500)
 	completedRace = False
 	surface = pygame.display.set_mode((1440, 850), 0, 32)
-	pygame.display.set_caption('Relay Race')
 	for i in range(3):
 		drawEnvironment(surface, race, i, results)
 def drawEnvironment(windowSurface, race, worldNum, results):
@@ -49,6 +48,7 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	font = pygame.font.SysFont("monospace", 25, True, False)
 	start = font.render("START", 1, (0,0,0), (255, 255, 255))
 	finish = font.render("FINISH", 1, (0,0,0), (255, 255, 255))
+	pygame.display.set_caption("Relay Race: Leg " + str(worldNum + 1))
 	move = 0
 	numWinners = -1
 	tdWinner, adpWinner, randomWinner = -1, -1, -1
