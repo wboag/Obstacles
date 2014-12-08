@@ -264,7 +264,7 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	if worldNum is 2:
 		drawClosingScreen(windowSurface, race, results)
 
-def getAgentImage(agentType, index, defSize = 50):
+def getAgentImage(agentType, index, defSize = 60):
 	image = None
 	if agentType == 'random':
 		if index == 0:
