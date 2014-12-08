@@ -50,7 +50,7 @@ class relayRace(object):
 		for index, terrain in enumerate(self.world.terrains):
 
 			for training in range(numIter):
-                                print training
+#                                print training
 				for tdAgent in self.world.tdAgents:
 					self.world.setAgentState(tdAgent, self.world.getStartState(index))
 					movements = list()
@@ -83,7 +83,8 @@ class relayRace(object):
                                         #print score
 					if score > self.highScores[(tdAgent.type, tdAgent.index, index)]:
 						self.highScores[(tdAgent.type, tdAgent.index, index)] = score
-                                        print "done"
+#                                        print "done"
+
 				for adpAgent in self.world.adpAgents:
 					self.world.setAgentState(adpAgent, self.world.getStartState(index))
 					movements = list()
@@ -200,6 +201,7 @@ class relayRace(object):
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.randomAgents[agentRef])
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
+                        racingAgent.endTraining()
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
 				terrainType = self.world.getTerrainType(oldState)
@@ -249,6 +251,7 @@ class relayRace(object):
 		for index, agentRef in enumerate(self.tdRaceOrder):
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.tdAgents[agentRef])
+                        racingAgent.endTraining()
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
@@ -282,11 +285,14 @@ a.trainAgents(100)
 # display Policy
 for i in range(3):
     print 'agent: ', i
+    agent = a.world.tdAgents[i]
+    agent.endTraining()
     for j in range(3):
-
         for k in range(10):
             for l in range(10):
-                print '%7s' % a.world.adpAgents[i].solver.getAction(State.state((l,k),j)),
+                state = State.state((l,k),j)
+                actions = a.world.getActions(state)
+                print '%7s' % agent.chooseAction(actions, state, state.getTerrainType()),
             print
         print '\n\n'
     print '\n\n\n'
@@ -311,6 +317,7 @@ for i in range(3):
 print 'tdAgents'
 for world in a.tdRaceOrder:
     print '\t', a.world.tdAgents[world].skillLevels
+    print '\t\t', a.world.tdAgents[world].weights
 print
 
 print 'adpAgents'
