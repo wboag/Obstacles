@@ -8,6 +8,7 @@
 
 
 from collections import defaultdict
+import state as State
 
 
 class EmpiricalMDP:
@@ -20,6 +21,7 @@ class EmpiricalMDP:
         # Constant rewards for each terrain type
         self.rewardValues = rewardValues
 
+
         # Empirical estimate of transition model
         # Initially, assume every q-state result is equally likely
         counts = defaultdict(lambda:defaultdict(lambda:{}))
@@ -30,6 +32,11 @@ class EmpiricalMDP:
 
         # Inferred skills
         self.skills = skills
+
+
+        # Convergence streaks
+        self.streaks = { k:0 for k in self.skills }
+        self.completed = []
 
 
 
@@ -74,54 +81,89 @@ class EmpiricalMDP:
         if action not in self.getPossibleActions(state):
             raise "Illegal action!"
 
-        '''
-        chanceToFall = None
-        chanceToSlideDown = None
-        chanceToSlideLeft = None
-        if terrainElement == 'grass':
-            chanceToFall = abs(newAgent.skillLevels['grass'] - 1) / 4
-        elif terrainElement == 'water':
-            chanceToFall = abs(newAgent.skillLevels['water'] - 1) / 4
-        elif terrainElement == 'forest':
-            chanceToFall = abs(newAgent.skillLevels['forest'] - 1) / 4
-        else:
-            chanceToFall = abs(newAgent.skillLevels['mountain'] - 1) / 2
         x, y = state.getPosition()
-        chanceToSlideDown = 0.1 - ((0.1 / 10) * (abs(y -  0)))
+        w = state.getWorld()
+
+        if action == 'finish':
+            return [(State.state((x,y), w), 1)]
+
+        # Store mapping from state to likelihood
+        possibles = defaultdict(lambda:0)
+
         chanceToSlideLeft = 0.1 - ((0.1 / 10) * (abs(x - 9)))
-        if random.random() <= chanceToSlideDown:
-            self.setAgentState(newAgent, State.state((x, min([9, y + 1])), state.getWorld()))
-        elif random.random() <= chanceToSlideLeft:
-            self.setAgentState(newAgent, State.state((max([x - 1, 0]), y), state.getWorld()))
-        elif random.random() <= chanceToFall:
-            self.setAgentState(newAgent, State.state((max([x - 1, 0]), min([9, y + 1])), state.getWorld()))
+        if x != 9:
+            possibles[State.state((x+1,y),w)]   += chanceToSlideLeft
         else:
-            self.setAgentState(newAgent, self.generateNextStates(state, action))
-        '''
+            possibles[state]                    += chanceToSlideLeft
 
-        # Empircal evidence (frequencies)
-        candidates = self.frequencies[state][action].items()
 
-        # Normalize into distribution
-        n = float(sum(self.frequencies[state][action].values()))
-        normed = [ (nextState,freq/n) for nextState,freq in candidates ]
+        chanceToSlideDown = 0.1 - ((0.1 / 10) * (abs(y - 0)))
+        if y != 0:
+            possibles[State.state((x,y-1),w)]   += chanceToSlideDown
+        else:
+            possibles[state]                    += chanceToSlideDown
 
-        return normed
 
+        terrainElement = state.getTerrainType()
+        if terrainElement == 'grass':
+            chanceToFall = abs(self.skills['grass'] - 1) / 4
+        elif terrainElement == 'water':
+            chanceToFall = abs(self.skills['water'] - 1) / 4
+        elif terrainElement == 'forest':
+            chanceToFall = abs(self.skills['forest'] - 1) / 4
+        else:
+            chanceToFall = abs(self.skills['mountain'] - 1) / 2
+
+        if x != 9 and y != 0:
+            possibles[State.state((x+1,y-1),w)] += chanceToFall
+        elif x != 9:
+            possibles[State.state((x+1,y  ),w)] += chanceToFall
+        elif y != 0:
+            possibles[State.state((x  ,y-1),w)] += chanceToFall
+        elif x == 9 and y == 0:
+            possibles[State.state((x  ,y  ),w)] += chanceToFall
+        else:
+            raise 'didnt account for this'
+
+
+        if action == 'north':
+            newState = State.state((x  ,y-1),w)
+        if action == 'east':
+            newState = State.state((x+1,y  ),w)
+        if action == 'west':
+            newState = State.state((x-1,y  ),w)
+        if action == 'south':
+            newState = State.state((x  ,y+1),w)
+        possibles[newState] += 1 - (chanceToFall + chanceToSlideLeft + chanceToSlideDown)
+
+        # Probabilities must sum to 1
+        assert abs(sum(possibles.values()) - 1) < .001
+
+        return possibles.items()
+
+
+    def converged(self):
+        return len(self.completed) == 4
 
 
     def update(self, state, action, nextState, reward, terrain):
-        # Another observation of particular outcome
-        assert (self.frequencies[state][action][nextState] != 0)
-        self.frequencies[state][action][nextState] += 1
 
-        # Keep track of success on each terrain
+        # If skill for terrain has already convereged
+        if terrain in self.completed:
+            return
 
-        # Update empirical skill estimate
-        # TODO: Stop udating after convergence (AKA doesnt change by .01 for 20 iterations)
+        # Get empirical skill estimate
         x,y = state.getPosition()
         skillScore = reward - (abs(y - 9) + abs(x - 0))
         skillSample = skillScore/self.rewardValues[terrain]
-        self.skills[terrain] = (1 - self.alpha) * self.skills[terrain]   +     \
-                                    self.alpha  * skillSample
+
+        difference = skillSample - self.skills[terrain]
+        if difference < .01:
+            self.streaks[terrain] += 1
+            if self.streaks[terrain] >= 25:
+                self.completed.append(terrain)
+        else:
+            self.streaks[terrain] = 0
+            self.skills[terrain] = (1 - self.alpha) * self.skills[terrain]   +     \
+                                        self.alpha  * skillSample
         #print self.skills
