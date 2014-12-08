@@ -249,8 +249,9 @@ class tdAgent(agent):
         return max(actions, key = lambda action: self.getQValue(state, action) + random.uniform(-.001,0))
 
     def getAction(self, state):
+        '''
         return random.choice(self.getLegalActions(state)) if flipCoin(self.epsilon) else self.computeActionFromQValues(state)
-
+        '''
     def getQValue(self, state, action):
         features = self.__getFeatures(state)
 #        print features
@@ -258,6 +259,8 @@ class tdAgent(agent):
 
     def update(self, state, terrainType, action, nextState, reward, nextActions):
         ###Your Code Here :)###
+        pass
+        '''
         DEBUG= False
         p = False if not DEBUG else not (self.its % 10000)
             
@@ -282,10 +285,17 @@ class tdAgent(agent):
         if p:
             print self.weights
             print
-
+        '''
     def chooseAction(self, actions, state, terrainType):
         ###Your Code Here :)###
 #        self.actions = filter(lambda action : action not in ['west', 'south'], actions)
+        if flipCoin(0.08):
+            filteredActions = filter(lambda n: n == 'south' or n == 'west' or n == 'finish', actions)
+            if filteredActions == []: filteredActions = actions
+        else:
+            filteredActions = filter(lambda n: n == 'north' or n == 'east' or n == 'finish', actions)
+        return random.choice(filteredActions)
+        '''
         self.actions = actions
         return self.getAction(state)
-        
+        '''

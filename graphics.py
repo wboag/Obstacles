@@ -23,7 +23,7 @@ def simulation(results, race):
 	tdAgentScores = results[5]
 
 	pygame.init()
-	pygame.time.set_timer(USEREVENT + 1, 500)
+	pygame.time.set_timer(USEREVENT + 1, 250)
 	completedRace = False
 	surface = pygame.display.set_mode((1440, 850), 0, 32)
 	for i in range(3):
@@ -43,9 +43,103 @@ def drawSplashScreen(windowSurface, raceNum):
 		windowSurface.blit(sky, (0,0))
 		windowSurface.blit(text, (600,400))
 		for event in pygame.event.get():
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
 			if event.type == USEREVENT + 1:
 				numSeconds += 1
 		pygame.display.flip()
+
+def drawClosingScreen(windowSurface, race, results):
+	randomAgents = list()
+	adpAgents = list()
+	tdAgents = list()
+	for i in range(3):
+		randomAgents.append(getAgentImage('random', race.randomRaceOrder[i], 200))
+		adpAgents.append(getAgentImage('adp', race.adpRaceOrder[i], 200))
+		tdAgents.append(getAgentImage('td', race.tdRaceOrder[i], 200))
+	sky = pygame.image.load("background.jpg")
+	sky = pygame.transform.scale(sky, (1440, 850)) 
+	font = pygame.font.SysFont("arial", 25, True, False)
+	scoreText = font.render("Score: ", 1, (0, 0, 0), (255, 255, 255))
+	randomScore = sum(results[3])
+	adpScore = sum(results[4])
+	tdScore = sum(results[5])
+	teamImages = [float('inf'), float('inf'), float('inf')]
+	teamOneResultsText, teamTwoResultsText, teamThreeResultsText = None, None, None
+	scoreList = [adpScore, tdScore, randomScore]
+	scoreList.sort()
+	if randomScore == scoreList[2]:
+		teamOneResultsText = font.render("Random Agents: ", 1, (0, 0, 0), (255, 255, 255))
+		teamImages[0] = randomAgents
+	elif adpScore == scoreList[2]:
+		teamOneResultsText = font.render("ADP Agents: ", 1, (0, 0, 0), (255, 255, 255))
+		teamImages[0] = adpAgents
+	else:
+		teamOneResultsText = font.render("Approx. Q-Learning Agents: ", 1, (0, 0, 0), (255, 255, 255))
+		teamImages[0] = tdAgents
+	
+	if randomScore == scoreList[0]:
+		teamThreeResultsText = font.render("Random Agents: ", 1, (0, 0, 0), (255, 255, 255))
+		teamImages[2] = randomAgents
+	elif adpScore == scoreList[0]:
+		teamThreeResultsText = font.render("ADP Agents: ", 1, (0, 0, 0), (255, 255, 255))
+		teamImages[2] = adpAgents
+	elif tdScore == scoreList[0]:
+		teamThreeResultsText = font.render("Approx. Q-Learning Agents: ", 1, (0, 0, 0,), (255, 255, 255))
+		teamImages[2] = tdAgents
+
+	if randomScore == scoreList[1]:
+		teamTwoResultsText = font.render("Random Agents: ", 1, (0, 0, 0), (255, 255, 255))
+		teamImages[1] = randomAgents
+	elif adpScore == scoreList[1]:
+		teamTwoResultsText = font.render("ADP Agents: ", 1, (0, 0, 0), (255, 255, 255))
+		teamImages[1] = adpAgents
+	elif tdScore == scoreList[1]:
+		teamTwoResultsText = font.render("Approx. Q-Learning Agents: ", 1, (0, 0, 0,), (255, 255, 255))
+		teamImages[1] = tdAgents
+	randomScoreText = font.render(str(randomScore), 0, (0, 0, 0), (255, 255, 255))
+	adpScoreText = font.render(str(adpScore), 0, (0, 0, 0), (255, 255, 255))
+	tdScoreText = font.render(str(tdScore), 0, (0, 0, 0), (255, 255, 255))
+	scoreText = font.render("Score: ", 1, (0, 0, 0), (255, 255, 255))
+	displayResultsText = font.render("Displaying Results: ", 1, (0,0,0), (255, 255, 255))
+	displayResultsPos = (600, 0)	
+	teamOneResultsPos = (300, 100)
+	teamTwoResultsPos = (300, 350)
+	teamThreeResultsPos = (300, 600)
+	firstPlaceText = font.render("First Place: ", 1, (0, 0, 0), (255, 255, 255))
+	secondPlaceText = font.render("Second Place: ", 1, (0, 0, 0), (255, 255, 255))
+	thirdPlaceText = font.render("Third Place: ", 1, (0, 0, 0), (255, 255, 255))
+	firstPlacePos = (0, 100)
+	secondPlacePos = (0, 350)
+	thirdPlacePos = (0, 600)
+	numSeconds = 0
+	while 1: #numSeconds < 30:
+		windowSurface.blit(sky, (0,0))
+		windowSurface.blit(firstPlaceText, firstPlacePos)
+		windowSurface.blit(secondPlaceText, secondPlacePos)
+		windowSurface.blit(thirdPlaceText, thirdPlacePos)
+
+		windowSurface.blit(displayResultsText, displayResultsPos)
+		windowSurface.blit(teamOneResultsText, teamOneResultsPos)
+		windowSurface.blit(teamTwoResultsText, teamTwoResultsPos)
+		windowSurface.blit(teamThreeResultsText, teamThreeResultsPos)
+		
+		for i, score in enumerate(reversed(scoreList)):
+			tScore = font.render(str(score), 1, (0, 0, 0), (255, 255, 255))
+			windowSurface.blit(tScore, (1000, (100 + 250 * i)))
+		for i, team in enumerate(teamImages):
+			for j, member in enumerate(team):
+				member = pygame.transform.scale(member, (200, 200))
+				windowSurface.blit(member, (( 300 + 200 * j), (250 * i + 130)))
+		for event in pygame.event.get():
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
+			if event.type == USEREVENT + 1:
+				numSeconds += 1
+		pygame.display.flip()
+
 
 def drawEnvironment(windowSurface, race, worldNum, results):
 	tdAgent = getAgentImage('td', race.tdRaceOrder[worldNum])
@@ -165,9 +259,11 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	victors.append([tdAgent, adpAgent, randomAgent])
 	victorPositions.append([stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'td', worldNum, tdWinner), 
 		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'adp', worldNum, adpWinner), 
-		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'random', worldNum, randomWinner)]) 
+		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'random', worldNum, randomWinner)])
+	if worldNum is 2:
+		drawClosingScreen(windowSurface, race, results)
 
-def getAgentImage(agentType, index):
+def getAgentImage(agentType, index, defSize = 50):
 	image = None
 	if agentType == 'random':
 		if index == 0:
@@ -190,7 +286,7 @@ def getAgentImage(agentType, index):
 			image = pygame.image.load("karen.jpg")
 		else:
 			image = pygame.image.load("jim.jpg")
-	image = pygame.transform.scale(image, (60, 60))
+	image = pygame.transform.scale(image, (defSize, defSize))
 	return image
 
 def stateToCoordinates(state, typeAgent, worldNum, numWinners = 0):
