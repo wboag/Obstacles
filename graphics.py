@@ -12,6 +12,8 @@ import state as State
 victors = list()
 victorPositions = list()
 winnerHistory = list()
+headStart = [[0,0,0]]
+
 def simulation(results, race):
 	randomAgentMovements = results[0]
 	adpAgentMovements = results[1]
@@ -25,11 +27,34 @@ def simulation(results, race):
 	completedRace = False
 	surface = pygame.display.set_mode((1440, 850), 0, 32)
 	for i in range(3):
+		drawSplashScreen(surface, i)
 		drawEnvironment(surface, race, i, results)
+
+def drawSplashScreen(windowSurface, raceNum):
+	sky = pygame.image.load("background.jpg")
+	sky = pygame.transform.scale(sky, (1440, 850))
+	font = pygame.font.SysFont("arial", 25, True, False)
+	if raceNum is 0:
+		text = font.render("Beginning the Relay Race!", 1, (0,0,0), (255, 255, 255))
+	else:
+		text = font.render("Displaying Leg #" + str(raceNum + 1) + ":", 1, (0,0,0), (255, 255, 255))
+	numSeconds = 0
+	while numSeconds < 8:
+		windowSurface.blit(sky, (0,0))
+		windowSurface.blit(text, (600,400))
+		for event in pygame.event.get():
+			if event.type == USEREVENT + 1:
+				numSeconds += 1
+		pygame.display.flip()
+
 def drawEnvironment(windowSurface, race, worldNum, results):
 	tdAgent = getAgentImage('td', race.tdRaceOrder[worldNum])
 	randomAgent = getAgentImage('random', race.randomRaceOrder[worldNum])
 	adpAgent = getAgentImage('adp', race.adpRaceOrder[worldNum])
+	tdHeadStart = headStart[worldNum][2]
+	randomHeadStart = headStart[worldNum][0]
+	adpHeadStart = headStart[worldNum][1]
+	tdNewHeadStart, randomNewHeadStart, adpNewHeadStart = 0, 0, 0
 	tdAgentScore = results[5][worldNum]
 	randomAgentScore = results[3][worldNum]
 	adpAgentScore = results[4][worldNum]
@@ -75,10 +100,10 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	print "tdWinner", tdWinner
 	print "adpWinner", adpWinner
 	print "random", randomWinner
-	while not(move > len(results[0][worldNum]) and move > len(results[1][worldNum]) and move > len(results[2][worldNum])):
-	    randomAgentState = results[0][worldNum][min([move, len(results[0][worldNum]) - 1])]
-	    adpAgentState = results[1][worldNum][min([move, len(results[1][worldNum]) - 1])]
-	    tdAgentState = results[2][worldNum][min([move, len(results[2][worldNum]) - 1])]
+	while not(move + randomHeadStart > len(results[0][worldNum]) and move + adpHeadStart > len(results[1][worldNum]) and move + randomHeadStart > len(results[2][worldNum])):
+	    randomAgentState = results[0][worldNum][min([move + randomHeadStart, len(results[0][worldNum]) - 1])]
+	    adpAgentState = results[1][worldNum][min([move + adpHeadStart, len(results[1][worldNum]) - 1])]
+	    tdAgentState = results[2][worldNum][min([move + tdHeadStart, len(results[2][worldNum]) - 1])]
 	    for event in pygame.event.get():
 	        if event.type == QUIT:
 	            pygame.quit()
@@ -105,22 +130,12 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	    		windowSurface.blit(platform, (1140, 60))
 	    		windowSurface.blit(platform, (1240, 60))
 	    		windowSurface.blit(platform, (1340, 60))
-	    		
-	    		#if move is len(results[2][worldNum]) - 1:
-	    			#numWinners += 1
-	    			#tdWinner = numWinners
 	    		windowSurface.blit(tdAgent, stateToCoordinates(tdAgentState ,'td', worldNum, tdWinner))
 	    		if tdAgentState.getPosition() == (float("inf"), float("inf")):
 	    			drawAgentScore(results[5][worldNum], tdWinner, worldNum, windowSurface)
-	    		#if move is len(results[1][worldNum]) - 1:
-	    			#numWinners += 1
-	    			#adpWinner = numWinners
 	    		windowSurface.blit(adpAgent, stateToCoordinates(adpAgentState ,'adp', worldNum, adpWinner))
 	    		if adpAgentState.getPosition() == (float("inf"), float("inf")):
 	    			drawAgentScore(results[4][worldNum], adpWinner, worldNum, windowSurface)
-	    		#if move is len(results[0][worldNum]) - 1:
-	    			#numWinners += 1
-	    			#randomWinner = numWinners
 	    		windowSurface.blit(randomAgent, stateToCoordinates(randomAgentState ,'random', worldNum, randomWinner))
 	    		if randomAgentState.getPosition() == (float("inf"), float("inf")):
 	    			drawAgentScore(results[3][worldNum], randomWinner, worldNum, windowSurface)
@@ -139,7 +154,14 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 	    					drawAgentScore(winnerHistory[1][2 - j], j, 1, windowSurface)
 
 	    		pygame.display.flip()
+	    		if len(results[0][worldNum]) < move:
+	    			randomNewHeadStart += 1
+	    		if len(results[1][worldNum]) < move:
+	    			adpNewHeadStart += 1
+	    		if len(results[2][worldNum]) < move:
+	    			tdNewHeadStart += 1
 	    		move += 1
+	headStart.append([randomNewHeadStart, adpNewHeadStart, tdNewHeadStart])
 	scoreList = [tdAgentScore, randomAgentScore, adpAgentScore]
 	scoreList.sort()
 	print "scoreList is: ", scoreList
@@ -149,8 +171,8 @@ def drawEnvironment(windowSurface, race, worldNum, results):
 		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'adp', worldNum, adpWinner), 
 		stateToCoordinates(State.state((float("inf"), float("inf")), worldNum), 'random', worldNum, randomWinner)])
 	print "winnerHistory is:", winnerHistory 
-def getAgentImage(agentType, index):
 
+def getAgentImage(agentType, index):
 	image = None
 	if agentType == 'random':
 		if index == 0:
@@ -213,7 +235,7 @@ def stateToCoordinates(state, typeAgent, worldNum, numWinners = 0):
 def drawAgentScore(score, position, worldNum, windowSurface):
 	x, y = 0, 100
 	font = pygame.font.SysFont("arial", 12, False, False)
-	text = text = font.render("SCORE: %.2f" % score, 1, (0,0,0), (255, 255, 255))
+	text = text = font.render("Score: %.2f" % score, 1, (0,0,0), (255, 255, 255))
 	location = tuple()
 	if position is 0 and worldNum is 0:
 		location = (x, y)
