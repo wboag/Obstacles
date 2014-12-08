@@ -92,6 +92,11 @@ class agent(object):
 	def setIndex(self, value):
 		self.index = value
 
+        def endTraining(self):
+            self.epsilon = 0.
+            self.alpha = 1.
+            self.discount = 1.
+
 	
 class randomAgent(agent):
 	
@@ -127,7 +132,6 @@ class adpAgent(agent):
         self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.rewardValues, self.inferredSkills)
         self.solver = PolicyIterationAgent(self.empirical_mdp, iterations=100)
 
-        print 'ADP agent created'
         #exit()
 
         # Keep track of number of completed episodes
@@ -198,17 +202,90 @@ class adpAgent(agent):
 
 
 class tdAgent(agent):
-	
-    def __init__(self, goalPosition):
+
+    def __init__(self, goalPosition, eps = 0.5, alp = 0.5, gam = 0.9):
         super(tdAgent, self).__init__()
         self.type = "td"
         self.goalPosition = goalPosition
+        self.weights = dict()
+        self.qvalues = dict()
+        self.epsilon = eps
+        self.alpha = alp
+        self.discount = gam
+        self.its = 0
+        self.weights['finish'] = 1.0
         ###Your Code Here :)###
+        
+    def __getFeatures(self, state):
+        
+        pos = state.getPosition()
+        dy = pos[1] - self.goalPosition[1] + 1
+        dx = pos[1] - self.goalPosition[1] + 1
+        if pos != (float('inf'), float('inf')):
+            feat = dict({'dy %d' %(dy) : .1 / dy,
+                         'dx %d' %(dx): .1 / dx,
+                         state.getTerrainType() : .01})
+        else:
+            feat = dict({'finish' : 1000})
 
-    def update(self, oldState, terrainType, action, newState, reward):
+        return feat
+    def computeValueFromQValues(self, state):
+        actions = self.getLegalActions(state)
+        
+        if not actions:
+            return 0.0
+            
+        return max(self.getQValue(state, action) for action in actions)
+                    
+    def getLegalActions(self, state):
+        return self.actions
+
+    def computeActionFromQValues(self, state):
+        actions = self.getLegalActions(state)
+
+        if not actions:
+            return None
+
+        return max(actions, key = lambda action: self.getQValue(state, action) + random.uniform(-.001,0))
+
+    def getAction(self, state):
+        return random.choice(self.getLegalActions(state)) if flipCoin(self.epsilon) else self.computeActionFromQValues(state)
+
+    def getQValue(self, state, action):
+        features = self.__getFeatures(state)
+#        print features
+        return sum(self.weights.get(feature,0) * features[feature] for feature in features.keys())
+
+    def update(self, state, terrainType, action, nextState, reward, nextActions):
         ###Your Code Here :)###
-        pass
+        DEBUG= False
+        p = False if not DEBUG else not (self.its % 10000)
+            
+        self.its += 1
+    
+        features = self.__getFeatures(state)
+#        self.actions = filter(lambda action : action not in ['west', 'south'], nextActions)
+        self.actions = nextActions
+        difference = reward + \
+                     self.discount * self.computeValueFromQValues(nextState) - \
+                     self.getQValue(state, action)
+                     
+        #print features
+        if p:
+            print
+            print features
+            print self.weights
+            print reward, difference
+        self.weights.update((feature, self.weights.get(feature,0) + \
+                             self.alpha * difference * features[feature])
+                            for feature in features.keys())
+        if p:
+            print self.weights
+            print
 
     def chooseAction(self, actions, state, terrainType):
-        filteredActions = filter(lambda n: n == 'north' or n == 'east' or n == 'finish', actions)
-        return random.choice(filteredActions)
+        ###Your Code Here :)###
+#        self.actions = filter(lambda action : action not in ['west', 'south'], actions)
+        self.actions = actions
+        return self.getAction(state)
+        
