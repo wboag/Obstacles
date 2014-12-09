@@ -50,7 +50,7 @@ class relayRace(object):
 		for index, terrain in enumerate(self.world.terrains):
 
 			for training in range(numIter):
-#                                print training
+                                print training
 				for tdAgent in self.world.tdAgents:
 					self.world.setAgentState(tdAgent, self.world.getStartState(index))
 					movements = list()
@@ -71,7 +71,7 @@ class relayRace(object):
 							newState.setTerrainType(self.world.getTerrainType(newState))
 						reward = self.world.getReward(tdAgent, oldState)
 						movements.append(self.world.getAgentState(tdAgent))
-                                                nextActions = self.world.getActions(self.world.getAgentState(tdAgent))
+                                                nextActions = self.world.getActions(newState)
 						tdAgent.update(oldState, terrainType, action, newState, reward, nextActions)
 					for ind, state in enumerate(movements):
 						if self.world.completedRace(state, 0):
@@ -283,24 +283,32 @@ a.arrangeTeam()
 
 
 
-# display Policy errors
-for i,ind in enumerate(a.adpRaceOrder):
-
+# display Policy
+for i,ind in enumerate(a.tdRaceOrder):
+    agent = a.world.tdAgents[ind]
+    agent.endTraining()
+    print agent.epsilon, agent.discount, agent.alpha
     bad = False
     for j in range(10):
         for k in range(10):
-            action = a.world.adpAgents[ind].solver.getAction(State.state((k,j),i))
+            state = State.state((k,j),i)
+            actions = a.world.getActions(state)
+            action = agent.chooseAction(actions, state,
+                                        state.getTerrainType())
             if action == 'west' or action == 'south':
                 bad = True
 
     if bad:
         for j in range(10):
             for k in range(10):
-                action = a.world.adpAgents[ind].solver.getAction(State.state((k,j),i))
+                state = State.state((k,j),i)
+                actions = a.world.getActions(state)
+                action = agent.chooseAction(actions, state,
+                                            state.getTerrainType())
                 if action == 'south' or action == 'west':
-                    print '%7s' % action.upper(),
+                        print '%7s' % action.upper(),
                 else:
-                    print '%7s' % action,
+                        print '%7s' % action,
 
 #exit()
 '''
