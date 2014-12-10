@@ -85,19 +85,19 @@ class EmpiricalMDP:
         w = state.getWorld()
 
         if action == 'finish':
-            return [(State.state((x,y), w), 1)]
+            return [(state, 1)]
 
         # Store mapping from state to likelihood
         possibles = defaultdict(lambda:0)
 
-        chanceToSlideLeft = 0.1 - ((0.1 / 10) * (abs(x - 9)))
+        chanceToSlideLeft = 0.1 - (0.01 * (abs(x - 9)))
         if x != 9:
             possibles[State.state((x+1,y),w)]   += chanceToSlideLeft
         else:
             possibles[state]                    += chanceToSlideLeft
 
 
-        chanceToSlideDown = 0.1 - ((0.1 / 10) * (abs(y - 0)))
+        chanceToSlideDown = 0.1 - (0.01 * (abs(y - 0)))
         if y != 0:
             possibles[State.state((x,y-1),w)]   += chanceToSlideDown
         else:

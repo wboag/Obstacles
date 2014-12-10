@@ -8,27 +8,13 @@
 
 
 from collections import defaultdict
+import random
 
-
-def max0(lst):
-    if not lst: return 0
-    return max(lst)
-
-
-def arg_max(func, lst):
-    bestArg = None
-    maxVal = float('-inf')
-    for elem in lst:
-        val = func(elem)
-        if val > maxVal:
-            maxVal = val
-            bestArg = elem
-    return bestArg
 
 
 class PolicyIterationAgent:
 
-    def __init__(self, mdp, discount=0.5, iterations=5):
+    def __init__(self, mdp, discount=0.5, iterations=20):
 
         # parameters
         self.discount = discount
@@ -38,37 +24,28 @@ class PolicyIterationAgent:
 
         # Initial policy is random
         values = defaultdict(lambda:0)
-        policy = { state:self.mdp.getPossibleActions(state)[0] for state in self.mdp.getStates() }
+        policy = { state:random.choice(self.mdp.getPossibleActions(state)) for state in self.mdp.getStates() }
 
         # Converged early?
         streak = 0
 
         for _ in range(iterations):
+            #print '\tit: ', _
 
             # step one: policy evaluation
-            newValues = self.policyEvaluation(policy, values, iterations)
+            newValues = self.policyEvaluation(policy, values, iterations=50)
 
             # step two one-step lookahead of expectimax
             newPolicy = {}
             for state in self.mdp.getStates():
                 actions = self.mdp.getPossibleActions(state)
-                if state.getPosition() == (8,0): save = state
-                #if ('north' in actions) and ('east' in actions) and (self.computeQValue(newValues,state,'east') > self.computeQValue(newValues,state,'north')):
-                #    for a in actions:
-                #        print state, '\t', a, '\t', self.computeQValue(newValues,state,a)
-                #    print
-                #print arg_max(lambda a: self.computeQValue(newValues, state, a),
-                #              self.mdp.getPossibleActions(state))
-
-                newPolicy[state] = arg_max(lambda a: self.computeQValue(newValues, state, a),
-                                           self.mdp.getPossibleActions(state))
+                newPolicy[state] = max(self.mdp.getPossibleActions(state),
+                                       key=lambda a: self.computeQValue(newValues, state, a))
 
             diffs = 0
             for state in self.mdp.getStates():
                 if policy[state] != newPolicy[state]:
                     diffs += 1
-                    #print state, '\t', policy[state], '\t', newPolicy[state], '\t', self.mdp.getPossibleActions(state)
-            #print '\n\n'
 
             # for next iteration
             values = newValues
@@ -76,11 +53,10 @@ class PolicyIterationAgent:
 
             # Convergence?
             if diffs == 0:
-                break
                 streak += 1
             else:
                 streak = 0
-            if streak >= 25: break
+            if streak >= 15: break
 
         #print 'CONVERGED'
         #for state in self.mdp.getStates():
@@ -122,6 +98,8 @@ class PolicyIterationAgent:
     def policyEvaluation(self, policy, values, iterations=50):
         # Simplified value iteration
         for _ in range(iterations):
+            #print '\t\tjt: ', _
+
             newValues = defaultdict(lambda:0)
 
             diffs = 0
@@ -136,8 +114,6 @@ class PolicyIterationAgent:
                 # Compute qValue
                 qVal = 0
                 for sPrime,prob in self.mdp.getTransitionStatesAndProbs(state, action):
-                    #if state.getPosition() == (9,0):
-                    #    print state, '\t', action, '\t', sPrime
                     qVal += prob * (self.mdp.getReward(state,action,sPrime) + self.discount*values[sPrime])
                 newValues[state] = qVal
 
@@ -147,7 +123,7 @@ class PolicyIterationAgent:
             values = newValues
 
             # Convergence?
-            if diffs < .001: break
+            if diffs < .1: break
 
         return values
 

@@ -38,11 +38,11 @@ class relayRace(object):
 								nextState.setTerrainType(self.world.getTerrainType(nextState))
 							transitions.append( (curState, action, nextState) )
 
+		skills = { k:(random.random() + .5)  for  k   in  ['water','grass','forest','mountain'] }
 		for i in range(3):
 			# Each team has equal skills (apples to apples comparison)
-			skills = { k:(random.random() + .5)  for  k   in  ['water','grass','forest','mountain'] }
-			self.world.addAgent(Agent.adpAgent(self.world, transitions), skills)
-			self.world.addAgent(Agent.tdAgent((9,0))                   , skills)
+			self.world.addAgent(Agent.adpAgent(self.world, transitions, discount=self.world.discount), skills)
+			self.world.addAgent(Agent.tdAgent((9,0)                   ,      gam=self.world.discount), skills)
 			self.world.addAgent(Agent.randomAgent()                    , skills)
 	
 	#tested
@@ -50,12 +50,12 @@ class relayRace(object):
 		for index, terrain in enumerate(self.world.terrains):
 
 			for training in range(numIter):
-                                print training
+				print training
 				for tdAgent in self.world.tdAgents:
 					self.world.setAgentState(tdAgent, self.world.getStartState(index))
 					movements = list()
 					score = 0
-                                        i = 0
+					i = 0
 					while not self.world.completedRace(self.world.getAgentState(tdAgent), index):
 						oldState = self.world.getAgentState(tdAgent)
 #                                                if not i % 5000:
@@ -71,7 +71,7 @@ class relayRace(object):
 							newState.setTerrainType(self.world.getTerrainType(newState))
 						reward = self.world.getReward(tdAgent, oldState)
 						movements.append(self.world.getAgentState(tdAgent))
-                                                nextActions = self.world.getActions(newState)
+						nextActions = self.world.getActions(newState)
 						tdAgent.update(oldState, terrainType, action, newState, reward, nextActions)
 					for ind, state in enumerate(movements):
 						if self.world.completedRace(state, 0):
@@ -80,7 +80,6 @@ class relayRace(object):
 							score += (self.world.terminalReward * (self.world.discount ** ind))
 						else:
 							score += (self.world.getReward(tdAgent, state) * (self.world.discount ** ind))
-                                        #print score
 					if score > self.highScores[(tdAgent.type, tdAgent.index, index)]:
 						self.highScores[(tdAgent.type, tdAgent.index, index)] = score
 #                                        print "done"
@@ -201,7 +200,7 @@ class relayRace(object):
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.randomAgents[agentRef])
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
-                        racingAgent.endTraining()
+			racingAgent.endTraining()
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
 				terrainType = self.world.getTerrainType(oldState)
@@ -225,7 +224,7 @@ class relayRace(object):
 		for index, agentRef in enumerate(self.adpRaceOrder):
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.adpAgents[agentRef])
-			racingAgent.setEpsilon(0.001)
+			racingAgent.setEpsilon(0.01)
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
@@ -251,7 +250,7 @@ class relayRace(object):
 		for index, agentRef in enumerate(self.tdRaceOrder):
 			racingAgentMovements = list()
 			racingAgent = self.world.getWorldAgent(self.world.tdAgents[agentRef])
-                        racingAgent.endTraining()
+			racingAgent.endTraining()
 			self.world.setAgentState(racingAgent, self.world.getStartState(index))
 			while not self.world.completedRace(self.world.getAgentState(racingAgent), index):
 				oldState = self.world.getAgentState(racingAgent)
@@ -282,11 +281,45 @@ a.trainAgents(100)
 a.arrangeTeam()
 
 
+'''
+for i,ind in enumerate(a.adpRaceOrder):
+    agent = a.world.adpAgents[ind]
+    agent.endTraining()
+    agent.epsilon = 0.0
+    print agent.epsilon, agent.discount, agent.alpha
+    bad = False
+    for j in range(10):
+        for k in range(10):
+            state = State.state((k,j),i)
+            actions = a.world.getActions(state)
+            action = agent.chooseAction(state)
+            if action == 'west' or action == 'south':
+                bad = True
+
+    bad = True
+    if bad:
+        for j in range(10):
+            for k in range(10):
+                state = State.state((k,j),i)
+                actions = a.world.getActions(state)
+                action = agent.chooseAction(state)
+                if action == 'south' or action == 'west':
+                        print '%7s' % action.upper(),
+                else:
+                        print '%7s' % action,
+            print
+        print '\n\n'
+'''
+
+'''
+print '---'
+
 
 # display Policy
 for i,ind in enumerate(a.tdRaceOrder):
     agent = a.world.tdAgents[ind]
     agent.endTraining()
+    agent.epsilon = 0.0
     print agent.epsilon, agent.discount, agent.alpha
     bad = False
     for j in range(10):
@@ -298,6 +331,7 @@ for i,ind in enumerate(a.tdRaceOrder):
             if action == 'west' or action == 'south':
                 bad = True
 
+    bad = True
     if bad:
         for j in range(10):
             for k in range(10):
@@ -309,8 +343,39 @@ for i,ind in enumerate(a.tdRaceOrder):
                         print '%7s' % action.upper(),
                 else:
                         print '%7s' % action,
+            print
+        print '\n\n'
 
-#exit()
+    printVisited = True
+    if printVisited:
+        for j in range(10):
+            for k in range(10):
+                state = State.state((k,j),i)
+                v = agent.visited[state]
+                if 'finish' in v:
+                    print '    ' + str(v['finish']),
+                else:
+                    print ' %3d/%3d/%3d/%3d ' % (v['north'],v['east'],v['west'],v['south']),
+            print
+        print '\n\n'
+
+    printQvals = True
+    if printQvals:
+        for j in range(10):
+            for k in range(10):
+                state = State.state((k,j),i)
+                actions = a.world.getActions(state)
+                v = {'north':0,'east':0,'west':0,'south':0}
+                v.update({ a:agent.getQValue(state,a) for a in actions })
+                if 'finish' in v:
+                    print '    ' + str(v['finish']),
+                else:
+                    print ' %3f/%3f/%3f/%3f ' % (v['north'],v['east'],v['west'],v['south']),
+            print
+        print '\n\n'
+
+
+exit()
 '''
 
 '''

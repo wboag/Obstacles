@@ -92,10 +92,10 @@ class agent(object):
 	def setIndex(self, value):
 		self.index = value
 
-        def endTraining(self):
-            self.epsilon = 0.01
-            self.alpha = 1.
-            self.discount = 1.
+	def endTraining(self):
+		self.epsilon = 0.01
+		self.alpha = 1.
+		self.discount = 1.
 
 	
 class randomAgent(agent):
@@ -118,19 +118,20 @@ class randomAgent(agent):
 
 class adpAgent(agent):
 	
-    def __init__(self, gameworld, all_qstate_results):
+    def __init__(self, gameworld, all_qstate_results, discount=0.5):
         super(adpAgent, self).__init__()
         self.type = "adp"
 
         # Parameters
-        self.epsilon = 0.2
-
-        #return
+        self.epsilon = 0.4
+        self.discount = discount
 
         # Estimate of model
         self.inferredSkills = { k:1 for k  in ['water','grass','forest','mountain'] }
         self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.rewardValues, self.inferredSkills)
-        self.solver = PolicyIterationAgent(self.empirical_mdp, iterations=100)
+        #print 'solving MDP'
+        self.solver = PolicyIterationAgent(self.empirical_mdp, discount=discount, iterations=10)
+        #print 'solved MDP'
 
         #exit()
 
@@ -145,10 +146,6 @@ class adpAgent(agent):
 
 
     def update(self, state, terrain, action, nextState, reward):
-        #print 'state:     ', state
-        #print 'action:    ', action
-        #print 'nextState: ', nextState
-        #print 'reward:    ', reward
 
         # If already converged, then skip update
         if self.converged:
@@ -160,36 +157,25 @@ class adpAgent(agent):
         # If converged AFTER most recent update, then solve MDP for final time
         if self.empirical_mdp.converged():
             #print str(self.completed) + ': final solving'
-            self.solver = self.solver = PolicyIterationAgent(self.empirical_mdp, iterations=100)
+            self.solver = self.solver = PolicyIterationAgent(self.empirical_mdp, discount=self.discount, iterations=50)
+            #print 'solved MDP'
             self.converged = True
             return
 
         # If finished epsiode
         if action == 'finish':
             #print 'finished\n\n\n'
-            # Only re-solve every 10 episodes (speeds up training)
+            # Backoff how often you re-solve (speeds up training)
             if self.completed == self.nextUpdate:
                 #print str(self.completed) + ': solving again'
-                self.solver = self.solver = PolicyIterationAgent(self.empirical_mdp, iterations=100)
+                self.solver = self.solver = PolicyIterationAgent(self.empirical_mdp, discount=self.discount, iterations=50)
+                #print 'solved MDP'
                 self.nextUpdate *= 2
             self.completed += 1
 
     def chooseAction(self, state):
         ###Your Code Here :)###
-        #print
-        #print 'state: ', state
-        #print 'old:  ', actions
-
-        #return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), actions))
-
-        '''
-        # Early exploration
-        if self.completed < 20:
-            actions = self.empirical_mdp.getPossibleActions(state)
-            newActions = filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), actions)
-            #print 'exploring'
-            return random.choice(newActions)
-        '''
+        #return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), self.empirical_mdp.getPossibleActions(state)))
 
         if flipCoin(self.epsilon):
             #print 'random'
@@ -197,8 +183,6 @@ class adpAgent(agent):
         else:
             #print 'policy'
             return self.solver.getAction(state)
-
-        #return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), actions))
 
 
 class tdAgent(agent):
@@ -229,7 +213,7 @@ class tdAgent(agent):
             return (0,0)
 
     def __getFeatures(self, state, action):
-        
+
         x,y = state.getPosition()
         dx, dy = self.__dirToVect(action)
         next_x, next_y = x + dx, y + dy
@@ -267,12 +251,12 @@ class tdAgent(agent):
         return feat
     def computeValueFromQValues(self, state):
         actions = self.getLegalActions(state)
-        
+
         if not actions:
             return 0.0
-            
+
         return max(self.getQValue(state, action) for action in actions)
-                    
+
     def getLegalActions(self, state):
         return self.actions
 
@@ -344,5 +328,3 @@ class tdAgent(agent):
         act = self.getAction(state)
         self.oldAct = act
         return act
-        
-
