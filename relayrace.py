@@ -50,7 +50,7 @@ class relayRace(object):
 		for index, terrain in enumerate(self.world.terrains):
 
 			for training in range(numIter):
-				print training
+				#print training
 				for tdAgent in self.world.tdAgents:
 					self.world.setAgentState(tdAgent, self.world.getStartState(index))
 					movements = list()
@@ -133,7 +133,6 @@ class relayRace(object):
 						self.highScores[(randomAgent.type, randomAgent.index, index)] = score
 	#tested
 	def arrangeTeam(self):
-		
 		adpHighScore, adpArrangement = 0, list()
 		tdHighScore, tdArrangement = 0, list()
 		randomHighScore, randomArrangement = 0, list()
@@ -277,7 +276,7 @@ a = relayRace()
 print ""
 print "TRAINING AGENTS..."
 print ""
-a.trainAgents(100)
+a.trainAgents(1000)
 a.arrangeTeam()
 
 
@@ -311,9 +310,9 @@ for i,ind in enumerate(a.adpRaceOrder):
         print '\n\n'
 '''
 
-'''
-print '---'
 
+print '---'
+'''
 
 # display Policy
 for i,ind in enumerate(a.tdRaceOrder):
@@ -370,12 +369,12 @@ for i,ind in enumerate(a.tdRaceOrder):
                 if 'finish' in v:
                     print '    ' + str(v['finish']),
                 else:
-                    print ' %3f/%3f/%3f/%3f ' % (v['north'],v['east'],v['west'],v['south']),
+                    print ' %3.1f/%3.1f/%3.1f/%3.1f ' % (v['north'],v['east'],v['west'],v['south']),
             print
         print '\n\n'
 
 
-exit()
+#exit()
 '''
 
 '''

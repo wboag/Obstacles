@@ -15,8 +15,8 @@ class gameWorld(object):
 	
 	def __init__(self):
 		self.terrains = [Terrain.terrain(), Terrain.terrain(), Terrain.terrain()]
-		self.livingReward = 0
-		self.discount = 0.95
+		self.livingReward = -1
+		self.discount = .95
 		self.noise = 0
 		self.startState = State.state()
 		self.transitionalStates = [State.state((9,0), 0), State.state((9,0), 1)]
@@ -115,14 +115,14 @@ class gameWorld(object):
 			manDist = (abs(y - 9) + abs(x - 0))
 			terrainElement = repr(self.terrains[terrain].terrainWorld[x][y])
 			if terrainElement == 'grass':
-				return (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['grass']) + manDist
-			if terrainElement == 'forest':
-				return (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['forest']) + manDist
-			if terrainElement == 'water':
-				return (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['water']) + manDist
+				rew = (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['grass']) + manDist
+			elif terrainElement == 'forest':
+				rew = (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['forest']) + manDist
+			elif terrainElement == 'water':
+				rew = (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['water']) + manDist
 			else:
-				return (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['mountain']) + manDist
-
+				rew = (self.terrains[terrain].terrainWorld[x][y].getScore() * newAgent.skillLevels['mountain']) + manDist
+			return self.livingReward / (rew * .1)
 	#tested
 	def getStartState(self, terrainNum = 0):
 		return State.state((0,9), terrainNum)
