@@ -59,7 +59,7 @@ def drawClosingScreen(windowSurface, race, results):
 		adpAgents.append(getAgentImage('adp', race.adpRaceOrder[i], 200))
 		tdAgents.append(getAgentImage('td', race.tdRaceOrder[i], 200))
 	sky = pygame.image.load("background.jpg")
-	sky = pygame.transform.scale(sky, (1440, 850)) 
+	sky = pygame.transform.scale(sky, (1440, 850))
 	font = pygame.font.SysFont("arial", 25, True, False)
 	scoreText = font.render("Score: ", 1, (0, 0, 0), (255, 255, 255))
 	randomScore = sum(results[3])

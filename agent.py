@@ -147,6 +147,8 @@ class adpAgent(agent):
 
     def update(self, state, terrain, action, nextState, reward):
 
+        return
+
         # If already converged, then skip update
         if self.converged:
             return
@@ -175,7 +177,7 @@ class adpAgent(agent):
 
     def chooseAction(self, state):
         ###Your Code Here :)###
-        #return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), self.empirical_mdp.getPossibleActions(state)))
+        return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), self.empirical_mdp.getPossibleActions(state)))
 
         if flipCoin(self.epsilon):
             #print 'random'
@@ -198,6 +200,8 @@ class tdAgent(agent):
         self.discount = gam
         self.its = 0
         self.weights['finish'] = 1.0
+        self.visited = defaultdict(lambda:defaultdict(lambda:0))
+        self.completed = 0
         ###Your Code Here :)###
 
     def __dirToVect(self, action):
@@ -213,42 +217,15 @@ class tdAgent(agent):
             return (0,0)
 
     def __getFeatures(self, state, action):
-
         x,y = state.getPosition()
         dx, dy = self.__dirToVect(action)
         next_x, next_y = x + dx, y + dy
         dy = next_y - self.y + 1
         dx = self.x - next_x + 1
-        norm = 1. / (dx + dy)
 
-        if (x,y) != (float('inf'), float('inf')):
-#            feat = dict({state.getTerrainType() : .01})
-#            feat = dict({state : 1.})
-            feat = dict({'dy %d' %(dy) : 1.,
-                         'dx %d' %(dx) : 1.,
-                         'action %s' %(action) : 1.,
-                         state.getTerrainType() : 1.})
-#            feat = dict({'dy %d' %(dx) : norm,
-#                         'dx %d' %(dx): norm,
-#                         state.getTerrainType() : .01})
-#            feat = dict({'dy %d' %(dy) : .1 / dy,
-#                         'dx %d' %(dx) : .1 / dx,
-#                         'action %s' %(action) : 1.,
-#                         state.getTerrainType() : .01})
-#            feat = dict({'dy' : .1 / dy,
-#                         'dx' : .1 / dx,
-#                         state.getTerrainType() : .01})
-#            feat = dict({'dy %d' %(dx) : .1**dy,
-#                         'dx %d' %(dx): .1**dx,
-#                         state.getTerrainType() : .01})
-
-            #feat = dict({'dy %d' %(dy) : .1 / (dy * dy),
-            #'dx %d' %(dx): .1 / (dx * dx),
-            #state.getTerrainType() : .01})
-        else:
-            feat = dict({'finish' : 1000})
-
+        feat = {((x,y,state.getWorld()),action):1}
         return feat
+
     def computeValueFromQValues(self, state):
         actions = self.getLegalActions(state)
 
@@ -294,6 +271,15 @@ class tdAgent(agent):
 
     def update(self, state, terrainType, action, nextState, reward, nextActions):
         ###Your Code Here :)###
+        return
+
+        if self.visited[state][action] >= 40:
+            return
+        self.visited[state][action] += 1
+
+        if action == 'finish':
+            self.completed += 1
+
         DEBUG = 0
         p = False if not DEBUG else not (self.its % 50000)
 #        p = True
@@ -323,8 +309,13 @@ class tdAgent(agent):
 
     def chooseAction(self, actions, state, terrainType):
         ###Your Code Here :)###
-#        self.actions = filter(lambda action : action not in ['west', 'south'], actions)
-        self.actions = actions
+        return random.choice(filter(lambda action : action not in ['west', 'south'], actions))
+
+        if self.completed < 20:
+            self.actions = filter(lambda action : action not in ['west', 'south'], actions)
+        else:
+            self.actions = actions
+
         act = self.getAction(state)
         self.oldAct = act
         return act
