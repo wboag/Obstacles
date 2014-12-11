@@ -289,7 +289,7 @@ class tdAgent(agent):
             return None
 
 #        actvals = map(lambda action: self.getQValue(state, action) + random.uniform(0, .00001), actions)
-        actvals = map(lambda action: self.getQValue(state, action), actions)
+        #actvals = map(lambda action: self.getQValue(state, action), actions)
 #        if len(frozenset(actvals)) == 1:
 #            print "all the same"
 #        elif not self.its % 1:
@@ -297,17 +297,16 @@ class tdAgent(agent):
         return max(actions, key = lambda action: self.getQValue(state, action) + random.uniform(0,.00001))
 
     def getAction(self, state):
-        return random.choice(self.getLegalActions(state)) if flipCoin(self.epsilon) else self.computeActionFromQValues(state)
-#        return random.choice(
-#            filter(
-#                lambda action: action not in ('west', 'south'),
-#                self.getLegalActions(state))
-#        ) if flipCoin(self.epsilon) else self.computeActionFromQValues(state)
+        if flipCoin(self.epsilon):
+            return random.choice(self.getLegalActions(state))
+        else:
+            return self.computeActionFromQValues(state)
+
 
     def getQValue(self, state, action):
         features = self.__getFeatures(state, action)
 #        print features
-        return sum(self.weights.get(feature,0.) * features[feature] for feature in features.keys())
+        return sum([self.weights.get(feature,0.) * features[feature] for feature in features.keys()])
 
     def __printWeights(self):
         for key, val in self.weights.items():
@@ -316,9 +315,9 @@ class tdAgent(agent):
 
     def update(self, state, terrainType, action, nextState, reward, nextActions):
         ###Your Code Here :)###
-        return
+        #return
 
-        if self.visited[state][action] >= 40:
+        if self.visited[state][action] >= 80:
             return
         self.visited[state][action] += 1
 
@@ -332,6 +331,7 @@ class tdAgent(agent):
         features = self.__getFeatures(state, action)
 #        self.actions = filter(lambda action : action not in ['west', 'south'], nextActions)
         self.actions = nextActions
+        #print 'rward: ', reward, '\t', state, '\t', action, '\t', nextState
         difference = reward + \
                      self.discount * self.computeValueFromQValues(nextState) - \
                      self.getQValue(state, action)
@@ -354,7 +354,7 @@ class tdAgent(agent):
 
     def chooseAction(self, actions, state, terrainType):
         ###Your Code Here :)###
-        return random.choice(filter(lambda action : action not in ['west', 'south'], actions))
+        #return random.choice(filter(lambda action : action not in ['west', 'south'], actions))
 
         if self.completed < 20:
             self.actions = filter(lambda action : action not in ['west', 'south'], actions)
