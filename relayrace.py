@@ -6,15 +6,15 @@
 #
 ####
 
-import terrain as Terrain
 import state as State
 import agent as Agent
 import gameworld as Gameworld
-import graphics as Graphics
+#import graphics as Graphics
 
-import copy
 import random
 from collections import defaultdict
+
+random.seed(1)
 
 class relayRace(object):
 	
@@ -277,11 +277,11 @@ a = relayRace()
 print ""
 print "TRAINING AGENTS..."
 print ""
-a.trainAgents(100)
+a.trainAgents(50)
 a.arrangeTeam()
 
 
-'''
+#'''
 for i,ind in enumerate(a.adpRaceOrder):
     agent = a.world.adpAgents[ind]
     agent.endTraining()
@@ -291,8 +291,7 @@ for i,ind in enumerate(a.adpRaceOrder):
     for j in range(10):
         for k in range(10):
             state = State.state((k,j),i)
-            actions = a.world.getActions(state)
-            action = agent.chooseAction(state)
+            action = agent.solver.policy[state]
             if action == 'west' or action == 'south':
                 bad = True
 
@@ -301,15 +300,14 @@ for i,ind in enumerate(a.adpRaceOrder):
         for j in range(10):
             for k in range(10):
                 state = State.state((k,j),i)
-                actions = a.world.getActions(state)
-                action = agent.chooseAction(state)
+                action = agent.solver.policy[state]
                 if action == 'south' or action == 'west':
-                        print '%7s' % action.upper(),
+                    print '%7s' % action.upper(),
                 else:
-                        print '%7s' % action,
+                    print '%7s' % action,
             print
         print '\n\n'
-'''
+#'''
 
 '''
 print '---'
@@ -426,4 +424,4 @@ print "Third TD AGENT: \t", results[2][2][len(results[2][2]) - 1], "\t", results
 print ""
 print "BEGINNING SIMULATION:"
 print ""
-Graphics.simulation(results, race)
+#Graphics.simulation(results, race)
