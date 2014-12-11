@@ -38,7 +38,7 @@ from collections import defaultdict
 from empiricalMDP import EmpiricalMDP
 from  valueIterationAgent import ValueIterationAgent
 from policyIterationAgent import PolicyIterationAgent
-
+import time
 
 
 def flipCoin( p ):
@@ -116,6 +116,9 @@ class randomAgent(agent):
         pass
 
 
+import state as State
+
+
 class adpAgent(agent):
 	
     def __init__(self, gameworld, all_qstate_results, discount=0.5):
@@ -129,9 +132,51 @@ class adpAgent(agent):
         # Estimate of model
         self.inferredSkills = { k:1 for k  in ['water','grass','forest','mountain'] }
         self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.rewardValues, self.inferredSkills)
+        #self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.rewardValues, skills=self.skillLevels)
         #print 'solving MDP'
-        self.solver = PolicyIterationAgent(self.empirical_mdp, discount=discount, iterations=10)
+        start = time.time()
+        print 'start: ', start
+        self.learningAgent = PolicyIterationAgent #ValueIterationAgent
+        self.solver = self.learningAgent(self.empirical_mdp, discount=discount, iterations=50)
+        end = time.time()
+        print 'end:   ', end
         #print 'solved MDP'
+
+        print 'diff:  ', end - start
+
+        '''
+        for i in range(3):
+            for j in range(10):
+                for k in range(10):
+                    state = State.state((k,j),i)
+                    action = self.solver.policy[state]
+                    if action == 'south' or action == 'west':
+                            print '%7s' % action.upper(),
+                    else:
+                            print '%7s' % action,
+                print
+            print '\n\n'
+        '''
+
+        '''
+        import pickle
+        with open('opt-policy','wb') as f:
+            pickle.dump(self.solver.policy, f)
+        '''
+
+        '''
+        import pickle
+        with open('opt-policy','rb') as f:
+            opt_policy = pickle.load(f)
+
+        if opt_policy == self.solver.policy:
+            print 'good'
+        else:
+            print 'bad'
+            for state in opt_policy.keys():
+                if opt_policy[state] != self.solver.policy[state]:
+                    print '\t', state, '\t', opt_policy[state], '\t', self.solver.policy[state]
+        '''
 
         #exit()
 
@@ -147,7 +192,7 @@ class adpAgent(agent):
 
     def update(self, state, terrain, action, nextState, reward):
 
-        return
+        #return
 
         # If already converged, then skip update
         if self.converged:
@@ -159,7 +204,7 @@ class adpAgent(agent):
         # If converged AFTER most recent update, then solve MDP for final time
         if self.empirical_mdp.converged():
             #print str(self.completed) + ': final solving'
-            self.solver = self.solver = PolicyIterationAgent(self.empirical_mdp, discount=self.discount, iterations=50)
+            self.solver = self.solver = self.learningAgent(self.empirical_mdp, discount=self.discount, iterations=50)
             #print 'solved MDP'
             self.converged = True
             return
@@ -170,14 +215,14 @@ class adpAgent(agent):
             # Backoff how often you re-solve (speeds up training)
             if self.completed == self.nextUpdate:
                 #print str(self.completed) + ': solving again'
-                self.solver = self.solver = PolicyIterationAgent(self.empirical_mdp, discount=self.discount, iterations=50)
+                self.solver = self.solver = self.learningAgent(self.empirical_mdp, discount=self.discount, iterations=50)
                 #print 'solved MDP'
                 self.nextUpdate *= 2
             self.completed += 1
 
     def chooseAction(self, state):
         ###Your Code Here :)###
-        return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), self.empirical_mdp.getPossibleActions(state)))
+        #return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), self.empirical_mdp.getPossibleActions(state)))
 
         if flipCoin(self.epsilon):
             #print 'random'

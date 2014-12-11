@@ -29,17 +29,46 @@ class ValueIterationAgent:
         # values
         self.values = defaultdict(lambda:0)
 
+        self.policy = defaultdict(lambda:'')
+        streak = 0
+
         # Run value iteration for specified number of iterations
         for _ in range(iterations):
+            #print 'vit: ', _
+
             nextVals = defaultdict(lambda:0)
 
             # Get new value for each state
             for state in self.mdp.getStates():
-                if self.mdp.isTerminal(state): continue
                 # value is maximum Q-value
                 nextVals[state] = max0([ self.getQValue(state,a) for a in self.mdp.getPossibleActions(state) ])
 
             self.values = nextVals
+
+            '''
+            same = True
+            for state in self.values.keys():
+                if self.policy[state] != self.getAction(state):
+                    same = False
+                    break
+
+            self.policy = {}
+            for state in self.values.keys():
+                self.policy[state] = self.getAction(state)
+
+            if same == True:
+                streak += 1
+            else:
+                streak = 0
+            if streak >= 15: return
+            '''
+
+
+
+        # Store explicit policy
+        self.policy = {}
+        for state in self.values.keys():
+            self.policy[state] = self.getAction(state)
 
 
     def getValue(self, state):

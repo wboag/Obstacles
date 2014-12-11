@@ -10,7 +10,10 @@
 from collections import defaultdict
 import random
 
-
+import numpy
+import scipy.linalg
+import scipy.sparse
+import scipy.sparse.linalg
 
 class PolicyIterationAgent:
 
@@ -33,7 +36,8 @@ class PolicyIterationAgent:
             #print '\tit: ', _
 
             # step one: policy evaluation
-            newValues = self.policyEvaluation(policy, values, iterations=50)
+            newValues = self.linalg_policyEvaluation(policy, values, iterations=50)
+            #newValues = self.policyEvaluation(policy, values, iterations=200)
 
             # step two one-step lookahead of expectimax
             newPolicy = {}
@@ -125,8 +129,75 @@ class PolicyIterationAgent:
             # Convergence?
             if diffs < .1: break
 
+
+        for state in self.mdp.getStates():
+            if state.getWorld() == 0:
+                print state, '\t', values[state]
+
+        exit()
+
         return values
 
+
+    def linalg_policyEvaluation(self, policy, values, iterations=50):
+
+        # Separate states into different worlds
+        all_states = policy.keys()
+        states0 = filter(lambda s:s.getWorld() == 0, all_states)
+        states1 = filter(lambda s:s.getWorld() == 1, all_states)
+        states2 = filter(lambda s:s.getWorld() == 2, all_states)
+
+        all_values = {}
+
+        states_list = [states0,states1,states2]
+
+        for states in states_list:
+
+            indices = { state:i  for  i,state  in enumerate(states) }
+
+            # Build three matrices to solve (one for each world)
+            n = range(len(states1))
+            mat = [ [ 0 for _ in n ] for __ in n ]
+            b   = [ 0 for _ in n ]
+
+            # Enter each linear equation into the table
+            for state in states:
+
+                # Action under a given policy
+                action = policy[state]
+
+                # Subtract from both sides of Bellman equations
+                mat[indices[state]][indices[state]] -= 1
+
+                # Each entry in the matrix
+                for sPrime,prob in self.mdp.getTransitionStatesAndProbs(state,action):
+
+                    # Subtract each constant terms from both sides of Bellman equations
+                    # Note: technically, rewards come just from the state you leave so these are all the same
+                    b[indices[state]] -= prob * self.mdp.getReward(state,action,sPrime)
+
+                    # matrix entry (i,j) is the coefficient of variable j in equation i
+                    mat[indices[state]][indices[sPrime]] += self.discount * prob
+
+            # Convert b into a column vector
+            b = [ [v] for v in b ]
+
+            # Convert to matrices
+            mat_A = scipy.sparse.csr_matrix(mat)
+            vec_b = scipy.sparse.csr_matrix(b)
+
+            # Solve linear system of equations
+            x = scipy.sparse.linalg.spsolve(mat_A, vec_b)
+
+
+            # Extract values
+            values = {}
+            for state in states:
+                values[state] = x[indices[state]]
+
+            all_values.update(values)
+
+        return all_values
 
 
     def getAction(self, state):
