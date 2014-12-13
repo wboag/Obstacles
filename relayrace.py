@@ -14,8 +14,6 @@ import graphics as Graphics
 import random
 from collections import defaultdict
 
-random.seed(1)
-
 class relayRace(object):
 	
 	def __init__(self):
@@ -48,41 +46,38 @@ class relayRace(object):
 	#tested
 	def trainAgents(self, numIter):
 		for index, terrain in enumerate(self.world.terrains):
-
+			print "Training team #" + str(index + 1)
 			for training in range(numIter):
-				#print training
-				for tdAgent in self.world.tdAgents:
-					self.world.setAgentState(tdAgent, self.world.getStartState(index))
-					movements = list()
-					score = 0
-					i = 0
-					while not self.world.completedRace(self.world.getAgentState(tdAgent), index):
-						oldState = self.world.getAgentState(tdAgent)
-#                                                if not i % 5000:
-#                                                        print i, oldState.getPosition()
-                                                i += 1
-						terrainType = self.world.getTerrainType(oldState)
-						oldState.setTerrainType(terrainType)
-						actions = self.world.getActions(self.world.getAgentState(tdAgent))
-						action = tdAgent.chooseAction(actions, oldState, terrainType)
-						self.world.moveAgent(tdAgent, self.world.getAgentState(tdAgent), action)
-						newState = self.world.getAgentState(tdAgent)
-						if newState.getPosition() != (float("inf"), float("inf")):
-							newState.setTerrainType(self.world.getTerrainType(newState))
-						reward = self.world.getReward(tdAgent, oldState)
-						movements.append(self.world.getAgentState(tdAgent))
-						nextActions = self.world.getActions(newState)
-						tdAgent.update(oldState, terrainType, action, newState, reward, nextActions)
-					for ind, state in enumerate(movements):
-						if self.world.completedRace(state, 0):
-							score += (self.world.transitionalReward * (self.world.discount ** ind))
-						elif self.world.completedRace(state, 2):
-							score += (self.world.terminalReward * (self.world.discount ** ind))
-						else:
-							score += (self.world.getReward(tdAgent, state) * (self.world.discount ** ind))
-					if score > self.highScores[(tdAgent.type, tdAgent.index, index)]:
-						self.highScores[(tdAgent.type, tdAgent.index, index)] = score
-#                                        print "done"
+				print "Training round #" + str(training + 1)
+				for _ in range(3):
+					for tdAgent in self.world.tdAgents:
+						self.world.setAgentState(tdAgent, self.world.getStartState(index))
+						movements = list()
+						score = 0
+						i = 0
+						while not self.world.completedRace(self.world.getAgentState(tdAgent), index):
+							oldState = self.world.getAgentState(tdAgent)
+							terrainType = self.world.getTerrainType(oldState)
+							oldState.setTerrainType(terrainType)
+							actions = self.world.getActions(self.world.getAgentState(tdAgent))
+							action = tdAgent.chooseAction(actions, oldState, terrainType)
+							self.world.moveAgent(tdAgent, self.world.getAgentState(tdAgent), action)
+							newState = self.world.getAgentState(tdAgent)
+							if newState.getPosition() != (float("inf"), float("inf")):
+								newState.setTerrainType(self.world.getTerrainType(newState))
+							reward = self.world.getReward(tdAgent, oldState)
+							movements.append(self.world.getAgentState(tdAgent))
+							nextActions = self.world.getActions(newState)
+							tdAgent.update(oldState, terrainType, action, newState, reward, nextActions)
+						for ind, state in enumerate(movements):
+							if self.world.completedRace(state, 0):
+								score += (self.world.transitionalReward * (self.world.discount ** ind))
+							elif self.world.completedRace(state, 2):
+								score += (self.world.terminalReward * (self.world.discount ** ind))
+							else:
+								score += (self.world.getReward(tdAgent, state) * (self.world.discount ** ind))
+						if score > self.highScores[(tdAgent.type, tdAgent.index, index)]:
+							self.highScores[(tdAgent.type, tdAgent.index, index)] = score
 
 				for adpAgent in self.world.adpAgents:
 					self.world.setAgentState(adpAgent, self.world.getStartState(index))
@@ -110,7 +105,7 @@ class relayRace(object):
 							score += (self.world.getReward(adpAgent, state) * (self.world.discount ** ind))
 					if score > self.highScores[(adpAgent.type, adpAgent.index, index)]:
 						self.highScores[(adpAgent.type, adpAgent.index, index)] = score
-
+				
 				for randomAgent in self.world.randomAgents:
 					self.world.setAgentState(randomAgent, self.world.getStartState(index))
 					movements = list()
@@ -128,9 +123,9 @@ class relayRace(object):
 							score += (self.world.terminalReward * (self.world.discount ** ind))
 						else:
 							score += (self.world.getReward(randomAgent, state) * (self.world.discount ** ind))
-					#print score
 					if score > self.highScores[(randomAgent.type, randomAgent.index, index)]:
 						self.highScores[(randomAgent.type, randomAgent.index, index)] = score
+				
 	#tested
 	def arrangeTeam(self):
 		adpHighScore, adpArrangement = 0, list()
@@ -140,7 +135,6 @@ class relayRace(object):
 		for i, agentI in enumerate(self.world.adpAgents):
 			for j, agentJ in enumerate(self.world.adpAgents):
 				for k, agentK in enumerate(self.world.adpAgents):
-					####
 					if i != j and j != k and i != k:
 						agentIScore = self.highScores[(agentI.type, agentI.index, 0)]
 						agentJScore = self.highScores[(agentJ.type, agentJ.index, 1)]
@@ -153,7 +147,6 @@ class relayRace(object):
 		for i, agentI in enumerate(self.world.tdAgents):
 			for j, agentJ in enumerate(self.world.tdAgents):
 				for k, agentK in enumerate(self.world.tdAgents):
-					####
 					if i != j and j != k and i != k:
 						agentIScore = self.highScores[(agentI.type, agentI.index, 0)]
 						agentJScore = self.highScores[(agentJ.type, agentJ.index, 1)]
@@ -167,7 +160,6 @@ class relayRace(object):
 		for i, agentI in enumerate(self.world.randomAgents):
 			for j, agentJ in enumerate(self.world.randomAgents):
 				for k, agentK in enumerate(self.world.randomAgents):
-					####
 					if i != j and j != k and i != k:
 						agentIScore = self.highScores[(agentI.type, agentI.index, 0)]
 						agentJScore = self.highScores[(agentJ.type, agentJ.index, 1)]
@@ -180,9 +172,6 @@ class relayRace(object):
 		self.adpRaceOrder = adpArrangement
 		self.tdRaceOrder = tdArrangement
 		self.randomRaceOrder = randomArrangement
-		print "adp: ", adpArrangement, adpHighScore
-		print "td: ", tdArrangement, tdHighScore
-		print "random: ", randomArrangement, randomHighScore
 
 	#tested
 	def race(self):
@@ -231,7 +220,6 @@ class relayRace(object):
 				oldState.setTerrainType(terrainType)
 				actions = self.world.getActions(self.world.getAgentState(racingAgent))
 				action = racingAgent.chooseAction(oldState)
-				#print oldState, '\t', action
 				self.world.moveAgent(racingAgent, self.world.getAgentState(racingAgent), action)
 				racingAgentMovements.append(self.world.getAgentState(racingAgent))
 			adpStates.append(racingAgentMovements)
@@ -276,7 +264,7 @@ a = relayRace()
 print ""
 print "TRAINING AGENTS..."
 print ""
-a.trainAgents(50)
+a.trainAgents(150)
 a.arrangeTeam()
 
 
@@ -311,7 +299,7 @@ for i,ind in enumerate(a.adpRaceOrder):
 
 print '---'
 
-
+'''
 # display Policy
 for i,ind in enumerate(a.tdRaceOrder):
     agent = a.world.tdAgents[ind]
@@ -370,10 +358,7 @@ for i,ind in enumerate(a.tdRaceOrder):
                     print ' %3.1f/%3.1f/%3.1f/%3.1f ' % (v['north'],v['east'],v['west'],v['south']),
             print
         print '\n\n'
-
-
-#exit()
-
+'''
 
 '''
 # display Terrain

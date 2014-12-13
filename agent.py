@@ -6,33 +6,6 @@
 #
 ####
 
-###
-# README:
-#
-# 1.  If you want a dictionary with a default value (util.counters from UC Berkeley Problem Sets), 
-#       use a defaultdict as shown:  a = defaultdict(lambda: <DEFAULT-VALUE> )
-#
-# 2.  Choose action should use your current model of the world (however you choose to store it), 
-#       and compute the optimal action to be taken.  If you are in a terminal state, the only action is "finish"
-#
-# 3.  Update needs to perform whatever learning is needed to your model after each action is performed.
-#
-# 4.  the gameworld variable passed to your agents methods should contain all information required to perform your computations.
-#
-# 5.  Feel free to add more methods as needed!  training the agents only calls the methods provided, 
-#       and racing only calls chooseAction()
-###
-
-###
-# GAMEWORLD FUNCTIONALITY:
-# def getDiscount(self):
-#   returns discount factor [0,1)
-# def getLivingReward(self):
-#    returns reward for staying alive
-# 
-###
-
-
 import random
 from collections import defaultdict
 from empiricalMDP import EmpiricalMDP
@@ -132,18 +105,10 @@ class adpAgent(agent):
         # Estimate of model
         self.inferredSkills = { k:1 for k  in ['water','grass','forest','mountain'] }
         self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.rewardValues, self.inferredSkills)
-        #self.empirical_mdp = EmpiricalMDP(all_qstate_results, self.rewardValues, skills=self.skillLevels)
-        #print 'solving MDP'
         start = time.time()
-        print 'start: ', start
-        self.learningAgent = PolicyIterationAgent #ValueIterationAgent
+        self.learningAgent = PolicyIterationAgent #PolicyIterationAgent
         self.solver = self.learningAgent(self.empirical_mdp, discount=discount, iterations=50)
         end = time.time()
-        print 'end:   ', end
-        #print 'solved MDP'
-
-        print 'diff:  ', end - start
-
         '''
         for i in range(3):
             for j in range(10):
@@ -177,9 +142,6 @@ class adpAgent(agent):
                 if opt_policy[state] != self.solver.policy[state]:
                     print '\t', state, '\t', opt_policy[state], '\t', self.solver.policy[state]
         '''
-
-        #exit()
-
         # Keep track of number of completed episodes
         self.converged = False
         self.completed = 0
@@ -191,9 +153,6 @@ class adpAgent(agent):
 
 
     def update(self, state, terrain, action, nextState, reward):
-
-        #return
-
         # If already converged, then skip update
         if self.converged:
             return
@@ -203,38 +162,28 @@ class adpAgent(agent):
 
         # If converged AFTER most recent update, then solve MDP for final time
         if self.empirical_mdp.converged():
-            #print str(self.completed) + ': final solving'
             self.solver = self.solver = self.learningAgent(self.empirical_mdp, discount=self.discount, iterations=50)
-            #print 'solved MDP'
             self.converged = True
             return
 
         # If finished epsiode
         if action == 'finish':
-            #print 'finished\n\n\n'
             # Backoff how often you re-solve (speeds up training)
             if self.completed == self.nextUpdate:
-                #print str(self.completed) + ': solving again'
                 self.solver = self.solver = self.learningAgent(self.empirical_mdp, discount=self.discount, iterations=50)
-                #print 'solved MDP'
                 self.nextUpdate *= 2
             self.completed += 1
 
     def chooseAction(self, state):
-        ###Your Code Here :)###
-        #return random.choice(filter(lambda a: (a=='north') or (a=='east') or (a=='finish'), self.empirical_mdp.getPossibleActions(state)))
 
         if flipCoin(self.epsilon):
-            #print 'random'
             return random.choice(self.empirical_mdp.getPossibleActions(state))
         else:
-            #print 'policy'
             return self.solver.getAction(state)
-
 
 class tdAgent(agent):
 	
-    def __init__(self, goalPosition, eps = 0.3, alp = 0.5, gam = 0.9):
+    def __init__(self, goalPosition, eps = 0.7, alp = 0.3, gam = 0.95):
         super(tdAgent, self).__init__()
         self.type = "td"
         self.x, self.y = goalPosition
@@ -247,7 +196,6 @@ class tdAgent(agent):
         self.weights['finish'] = 1.0
         self.visited = defaultdict(lambda:defaultdict(lambda:0))
         self.completed = 0
-        ###Your Code Here :)###
 
     def __dirToVect(self, action):
         if action == 'north':
@@ -268,7 +216,7 @@ class tdAgent(agent):
         dy = next_y - self.y + 1
         dx = self.x - next_x + 1
 
-        feat = {((x,y,state.getWorld()),action):1}
+        feat = {(State.state((x, y), state.getWorld()),action):1}
         return feat
 
     def computeValueFromQValues(self, state):
@@ -284,16 +232,8 @@ class tdAgent(agent):
 
     def computeActionFromQValues(self, state):
         actions = self.getLegalActions(state)
-
         if not actions:
             return None
-
-#        actvals = map(lambda action: self.getQValue(state, action) + random.uniform(0, .00001), actions)
-        #actvals = map(lambda action: self.getQValue(state, action), actions)
-#        if len(frozenset(actvals)) == 1:
-#            print "all the same"
-#        elif not self.its % 1:
-#            print zip(actions, actvals)
         return max(actions, key = lambda action: self.getQValue(state, action) + random.uniform(0,.00001))
 
     def getAction(self, state):
@@ -302,10 +242,8 @@ class tdAgent(agent):
         else:
             return self.computeActionFromQValues(state)
 
-
     def getQValue(self, state, action):
         features = self.__getFeatures(state, action)
-#        print features
         return sum([self.weights.get(feature,0.) * features[feature] for feature in features.keys()])
 
     def __printWeights(self):
@@ -314,10 +252,7 @@ class tdAgent(agent):
         print
 
     def update(self, state, terrainType, action, nextState, reward, nextActions):
-        ###Your Code Here :)###
-        #return
-
-        if self.visited[state][action] >= 80:
+        if self.visited[state][action] >= 200:
             return
         self.visited[state][action] += 1
 
@@ -326,25 +261,15 @@ class tdAgent(agent):
 
         DEBUG = 0
         p = False if not DEBUG else not (self.its % 50000)
-#        p = True
         self.its += 1
         features = self.__getFeatures(state, action)
-#        self.actions = filter(lambda action : action not in ['west', 'south'], nextActions)
         self.actions = nextActions
-        #print 'rward: ', reward, '\t', state, '\t', action, '\t', nextState
         difference = reward + \
                      self.discount * self.computeValueFromQValues(nextState) - \
                      self.getQValue(state, action)
-        #print features
-#        print reward, difference, [(feature,
-#                                    self.weights.get(feature, 0.) + \
-#                                    self.alpha * difference * features[feature])
-#                                   for feature in features.keys()]
         if p:
             print
-#            print features
             self.__printWeights()
- #           print reward, difference
         self.weights.update((feature, self.weights.get(feature,0.) + \
                              self.alpha * difference * features[feature])
                             for feature in features.keys())
@@ -353,14 +278,12 @@ class tdAgent(agent):
             print
 
     def chooseAction(self, actions, state, terrainType):
-        ###Your Code Here :)###
-        #return random.choice(filter(lambda action : action not in ['west', 'south'], actions))
-
-        if self.completed < 20:
-            self.actions = filter(lambda action : action not in ['west', 'south'], actions)
+        if sum([self.visited[state][action] for action in self.visited[state].keys()]) < 20:
+            self.actions = filter(lambda action : action not in ['east', 'north'], actions)
+            if len(self.actions) is 0:
+                self.actions = filter(lambda action : action not in ['south', 'west'], actions)
         else:
             self.actions = actions
-
         act = self.getAction(state)
         self.oldAct = act
         return act
