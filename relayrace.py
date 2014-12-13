@@ -9,7 +9,7 @@
 import state as State
 import agent as Agent
 import gameworld as Gameworld
-#import graphics as Graphics
+import graphics as Graphics
 
 import random
 from collections import defaultdict
@@ -280,7 +280,7 @@ a.trainAgents(50)
 a.arrangeTeam()
 
 
-#'''
+'''
 for i,ind in enumerate(a.adpRaceOrder):
     agent = a.world.adpAgents[ind]
     agent.endTraining()
@@ -306,11 +306,11 @@ for i,ind in enumerate(a.adpRaceOrder):
                     print '%7s' % action,
             print
         print '\n\n'
-#'''
+'''
 
 
 print '---'
-'''
+
 
 # display Policy
 for i,ind in enumerate(a.tdRaceOrder):
@@ -373,7 +373,7 @@ for i,ind in enumerate(a.tdRaceOrder):
 
 
 #exit()
-'''
+
 
 '''
 # display Terrain
@@ -423,4 +423,4 @@ print "Third TD AGENT: \t", results[2][2][len(results[2][2]) - 1], "\t", results
 print ""
 print "BEGINNING SIMULATION:"
 print ""
-#Graphics.simulation(results, race)
+Graphics.simulation(results, race)

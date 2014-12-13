@@ -94,8 +94,8 @@ class agent(object):
 
 	def endTraining(self):
 		self.epsilon = 0.01
-		self.alpha = 1.
-		self.discount = 1.
+		self.alpha = 0.
+		self.discount = .95
 
 	
 class randomAgent(agent):
