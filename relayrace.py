@@ -10,7 +10,7 @@ import state as State
 import agent as Agent
 import gameworld as Gameworld
 import graphics as Graphics
-
+import sys
 import random
 from collections import defaultdict
 
@@ -49,35 +49,35 @@ class relayRace(object):
 			print "Training team #" + str(index + 1)
 			for training in range(numIter):
 				print "Training round #" + str(training + 1)
-				for _ in range(3):
-					for tdAgent in self.world.tdAgents:
-						self.world.setAgentState(tdAgent, self.world.getStartState(index))
-						movements = list()
-						score = 0
-						i = 0
-						while not self.world.completedRace(self.world.getAgentState(tdAgent), index):
-							oldState = self.world.getAgentState(tdAgent)
-							terrainType = self.world.getTerrainType(oldState)
-							oldState.setTerrainType(terrainType)
-							actions = self.world.getActions(self.world.getAgentState(tdAgent))
-							action = tdAgent.chooseAction(actions, oldState, terrainType)
-							self.world.moveAgent(tdAgent, self.world.getAgentState(tdAgent), action)
-							newState = self.world.getAgentState(tdAgent)
-							if newState.getPosition() != (float("inf"), float("inf")):
-								newState.setTerrainType(self.world.getTerrainType(newState))
-							reward = self.world.getReward(tdAgent, oldState)
-							movements.append(self.world.getAgentState(tdAgent))
-							nextActions = self.world.getActions(newState)
-							tdAgent.update(oldState, terrainType, action, newState, reward, nextActions)
-						for ind, state in enumerate(movements):
-							if self.world.completedRace(state, 0):
-								score += (self.world.transitionalReward * (self.world.discount ** ind))
-							elif self.world.completedRace(state, 2):
-								score += (self.world.terminalReward * (self.world.discount ** ind))
-							else:
-								score += (self.world.getReward(tdAgent, state) * (self.world.discount ** ind))
-						if score > self.highScores[(tdAgent.type, tdAgent.index, index)]:
-							self.highScores[(tdAgent.type, tdAgent.index, index)] = score
+				
+				for tdAgent in self.world.tdAgents:
+					self.world.setAgentState(tdAgent, self.world.getStartState(index))
+					movements = list()
+					score = 0
+					i = 0
+					while not self.world.completedRace(self.world.getAgentState(tdAgent), index):
+						oldState = self.world.getAgentState(tdAgent)
+						terrainType = self.world.getTerrainType(oldState)
+						oldState.setTerrainType(terrainType)
+						actions = self.world.getActions(self.world.getAgentState(tdAgent))
+						action = tdAgent.chooseAction(actions, oldState, terrainType)
+						self.world.moveAgent(tdAgent, self.world.getAgentState(tdAgent), action)
+						newState = self.world.getAgentState(tdAgent)
+						if newState.getPosition() != (float("inf"), float("inf")):
+							newState.setTerrainType(self.world.getTerrainType(newState))
+						reward = self.world.getReward(tdAgent, oldState)
+						movements.append(self.world.getAgentState(tdAgent))
+						nextActions = self.world.getActions(newState)
+						tdAgent.update(oldState, terrainType, action, newState, reward, nextActions)
+					for ind, state in enumerate(movements):
+						if self.world.completedRace(state, 0):
+							score += (self.world.transitionalReward * (self.world.discount ** ind))
+						elif self.world.completedRace(state, 2):
+							score += (self.world.terminalReward * (self.world.discount ** ind))
+						else:
+							score += (self.world.getReward(tdAgent, state) * (self.world.discount ** ind))
+					if score > self.highScores[(tdAgent.type, tdAgent.index, index)]:
+						self.highScores[(tdAgent.type, tdAgent.index, index)] = score
 
 				for adpAgent in self.world.adpAgents:
 					self.world.setAgentState(adpAgent, self.world.getStartState(index))
@@ -260,152 +260,161 @@ class relayRace(object):
 
 		return [randomStates, adpStates, tdStates, randomScores, adpScores, tdScores], self
 
-a = relayRace()
-print ""
-print "TRAINING AGENTS..."
-print ""
-a.trainAgents(150)
-a.arrangeTeam()
+def driver(testing, numIter):
+	a = relayRace()
+	print ""
+	print "TRAINING AGENTS..."
+	print ""
+	a.trainAgents(numIter)
+	a.arrangeTeam()
 
 
-'''
-for i,ind in enumerate(a.adpRaceOrder):
-    agent = a.world.adpAgents[ind]
-    agent.endTraining()
-    agent.epsilon = 0.0
-    print agent.epsilon, agent.discount, agent.alpha
-    bad = False
-    for j in range(10):
-        for k in range(10):
-            state = State.state((k,j),i)
-            action = agent.solver.policy[state]
-            if action == 'west' or action == 'south':
-                bad = True
+	'''
+	for i,ind in enumerate(a.adpRaceOrder):
+    	agent = a.world.adpAgents[ind]
+	    agent.endTraining()
+	    agent.epsilon = 0.0
+	    print agent.epsilon, agent.discount, agent.alpha
+	    bad = False
+	    for j in range(10):
+	        for k in range(10):
+	            state = State.state((k,j),i)
+	            action = agent.solver.policy[state]
+	            if action == 'west' or action == 'south':
+	                bad = True
 
-    bad = True
-    if bad:
-        for j in range(10):
-            for k in range(10):
-                state = State.state((k,j),i)
-                action = agent.solver.policy[state]
-                if action == 'south' or action == 'west':
-                    print '%7s' % action.upper(),
-                else:
-                    print '%7s' % action,
-            print
-        print '\n\n'
-'''
+	    bad = True
+    	if bad:
+        	for j in range(10):
+            	for k in range(10):
+                	state = State.state((k,j),i)
+                	action = agent.solver.policy[state]
+                	if action == 'south' or action == 'west':
+                    	print '%7s' % action.upper(),
+                	else:
+                    	print '%7s' % action,
+            	print
+        	print '\n\n'
+	'''
 
 
-print '---'
+	#print '---'
 
-'''
-# display Policy
-for i,ind in enumerate(a.tdRaceOrder):
-    agent = a.world.tdAgents[ind]
-    agent.endTraining()
-    agent.epsilon = 0.0
-    print agent.epsilon, agent.discount, agent.alpha
-    bad = False
-    for j in range(10):
-        for k in range(10):
-            state = State.state((k,j),i)
-            actions = a.world.getActions(state)
-            action = agent.chooseAction(actions, state,
+	'''
+	# display Policy
+	for i,ind in enumerate(a.tdRaceOrder):
+    	agent = a.world.tdAgents[ind]
+    	agent.endTraining()
+    	agent.epsilon = 0.0
+    	print agent.epsilon, agent.discount, agent.alpha
+    	bad = False
+    	for j in range(10):
+        	for k in range(10):
+            	state = State.state((k,j),i)
+            	actions = a.world.getActions(state)
+            	action = agent.chooseAction(actions, state,
                                         state.getTerrainType())
-            if action == 'west' or action == 'south':
-                bad = True
+            	if action == 'west' or action == 'south':
+                	bad = True
 
-    bad = True
-    if bad:
-        for j in range(10):
-            for k in range(10):
-                state = State.state((k,j),i)
-                actions = a.world.getActions(state)
-                action = agent.chooseAction(actions, state,
+	    bad = True
+    	if bad:
+        	for j in range(10):
+            	for k in range(10):
+                	state = State.state((k,j),i)
+                	actions = a.world.getActions(state)
+                	action = agent.chooseAction(actions, state,
                                             state.getTerrainType())
-                if action == 'south' or action == 'west':
+                	if action == 'south' or action == 'west':
                         print '%7s' % action.upper(),
-                else:
+                	else:
                         print '%7s' % action,
-            print
-        print '\n\n'
+            	print
+        	print '\n\n'
 
-    printVisited = True
-    if printVisited:
-        for j in range(10):
-            for k in range(10):
-                state = State.state((k,j),i)
-                v = agent.visited[state]
-                if 'finish' in v:
-                    print '    ' + str(v['finish']),
-                else:
-                    print ' %3d/%3d/%3d/%3d ' % (v['north'],v['east'],v['west'],v['south']),
-            print
-        print '\n\n'
+    	printVisited = True
+    	if printVisited:
+        	for j in range(10):
+            	for k in range(10):
+                	state = State.state((k,j),i)
+                	v = agent.visited[state]
+                	if 'finish' in v:
+                    	print '    ' + str(v['finish']),
+                	else:
+                    	print ' %3d/%3d/%3d/%3d ' % (v['north'],v['east'],v['west'],v['south']),
+            	print
+        	print '\n\n'
 
-    printQvals = True
-    if printQvals:
-        for j in range(10):
-            for k in range(10):
-                state = State.state((k,j),i)
-                actions = a.world.getActions(state)
-                v = {'north':0,'east':0,'west':0,'south':0}
-                v.update({ a:agent.getQValue(state,a) for a in actions })
-                if 'finish' in v:
-                    print '    ' + str(v['finish']),
-                else:
-                    print ' %3.1f/%3.1f/%3.1f/%3.1f ' % (v['north'],v['east'],v['west'],v['south']),
-            print
-        print '\n\n'
-'''
+    	printQvals = True
+    	if printQvals:
+        	for j in range(10):
+            	for k in range(10):
+                	state = State.state((k,j),i)
+                	actions = a.world.getActions(state)
+                	v = {'north':0,'east':0,'west':0,'south':0}
+                	v.update({ a:agent.getQValue(state,a) for a in actions })
+                	if 'finish' in v:
+                    	print '    ' + str(v['finish']),
+                	else:
+                    	print ' %3.1f/%3.1f/%3.1f/%3.1f ' % (v['north'],v['east'],v['west'],v['south']),
+            	print
+    	    print '\n\n'
+	'''
 
-'''
-# display Terrain
-for i in range(3):
-    for j in range(10):
-        for k in range(10):
-            print '%10s' % a.world.getTerrainType(State.state((k,j),i)),
-        print
-    print '\n\n'
-'''
+	'''
+	# display Terrain
+	for i in range(3):
+	    for j in range(10):
+	        for k in range(10):
+	            print '%10s' % a.world.getTerrainType(State.state((k,j),i)),
+	        print
+	    print '\n\n'
+	'''
 
-'''
-# display Skills
-print 'tdAgents'
-for world in a.tdRaceOrder:
-    print '\t', a.world.tdAgents[world].skillLevels
-    print '\t\t', a.world.tdAgents[world].weights
-print
+	'''
+	# display Skills
+	print 'tdAgents'
+	for world in a.tdRaceOrder:
+	    print '\t', a.world.tdAgents[world].skillLevels
+	    print '\t\t', a.world.tdAgents[world].weights
+	print
 
-print 'adpAgents'
-for world in a.adpRaceOrder:
-    print '\t', a.world.adpAgents[world].skillLevels
-print
+	print 'adpAgents'
+	for world in a.adpRaceOrder:
+	    print '\t', a.world.adpAgents[world].skillLevels
+	print
 
-print 'randomAgents'
-for world in a.randomRaceOrder:
-    print '\t', a.world.randomAgents[world].skillLevels
-print
+	print 'randomAgents'
+	for world in a.randomRaceOrder:
+	    print '\t', a.world.randomAgents[world].skillLevels
+	print
 
-#exit()
-'''
-
-print "\nRACING AGENTS..."
-print ""
-results, race = a.race()
-print "First RAND AGENT: \t", results[0][0][len(results[0][0]) - 1], "\t", results[3][0]
-print "Second RAND AGENT: \t", results[0][1][len(results[0][1]) - 1], "\t", results[3][1]
-print "Third RAND AGENT: \t", results[0][2][len(results[0][2]) - 1], "\t", results[3][2]
-print ""
-print "First ADP AGENT: \t", results[1][0][len(results[1][0]) - 1], "\t", results[4][0]
-print "Second ADP AGENT: \t", results[1][1][len(results[1][1]) - 1], "\t", results[4][1]
-print "Third ADP AGENT: \t", results[1][2][len(results[1][2]) - 1], "\t", results[4][2]
-print ""
-print "First TD AGENT: \t", results[2][0][len(results[2][0]) - 1], "\t", results[5][0]
-print "Second TD AGENT: \t", results[2][1][len(results[2][1]) - 1], "\t", results[5][1]
-print "Third TD AGENT: \t", results[2][2][len(results[2][2]) - 1], "\t", results[5][2]
-print ""
-print "BEGINNING SIMULATION:"
-print ""
-Graphics.simulation(results, race)
+	#exit()
+	'''
+	results, race = a.race()
+	if not testing:
+		print "\nRACING AGENTS..."
+		print ""
+		print "First RAND AGENT: \t", results[0][0][len(results[0][0]) - 1], "\t", results[3][0]
+		print "Second RAND AGENT: \t", results[0][1][len(results[0][1]) - 1], "\t", results[3][1]
+		print "Third RAND AGENT: \t", results[0][2][len(results[0][2]) - 1], "\t", results[3][2]
+		print ""
+		print "First ADP AGENT: \t", results[1][0][len(results[1][0]) - 1], "\t", results[4][0]
+		print "Second ADP AGENT: \t", results[1][1][len(results[1][1]) - 1], "\t", results[4][1]
+		print "Third ADP AGENT: \t", results[1][2][len(results[1][2]) - 1], "\t", results[4][2]
+		print ""
+		print "First TD AGENT: \t", results[2][0][len(results[2][0]) - 1], "\t", results[5][0]
+		print "Second TD AGENT: \t", results[2][1][len(results[2][1]) - 1], "\t", results[5][1]
+		print "Third TD AGENT: \t", results[2][2][len(results[2][2]) - 1], "\t", results[5][2]
+		print ""
+		print "BEGINNING SIMULATION:"
+		print ""
+		Graphics.simulation(results, race)	
+	else:
+		scores = dict()
+		scores['random'] = sum(results[3])
+		scores['adp'] = sum(results[4])
+		scores['td'] = sum(results[5])
+		return scores	
+if __name__ == '__main__':
+	driver(False, 150)
